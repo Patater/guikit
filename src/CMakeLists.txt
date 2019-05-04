@@ -4,6 +4,7 @@ include(../cmake/Warnings.cmake)
 
 add_library(guikit
     hash.c
+    hashmap.c
     panic.c
     pmemory.c
 )
