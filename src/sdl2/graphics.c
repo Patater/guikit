@@ -124,3 +124,60 @@ void FillScreen(int color)
 {
     SDL_FillRect(surface, NULL, surfaceColor(color));
 }
+
+static void drawVertLine(int x, int y, int len)
+{
+    SDL_Rect r;
+
+    r.x = x;
+    r.y = y;
+    r.w = 1;
+    r.h = len;
+
+    SDL_FillRect(surface, &r, penColor);
+}
+
+static void drawHorizLine(int x, int y, int len)
+{
+    SDL_Rect r;
+
+    r.x = x;
+    r.y = y;
+    r.w = len;
+    r.h = 1;
+
+    SDL_FillRect(surface, &r, penColor);
+}
+
+void DrawRect(int color, int x, int y, int width, int height)
+{
+    SetColor(color);
+
+    drawVertLine(x, y, height); /* Left */
+    drawHorizLine(x + 1, y, width - 1); /* Top */
+    drawVertLine(x + width - 1, y + 1, height - 1); /* Right */
+    drawHorizLine(x + 1, y + height - 1, width - 2); /* Bottom */
+}
+
+void FillRect(int color, int x, int y, int width, int height)
+{
+    SDL_Rect r;
+
+    r.x = x;
+    r.y = y;
+    r.w = width;
+    r.h = height;
+
+    SetColor(color);
+    SDL_FillRect(surface, &r, penColor);
+}
+
+void FillRectOp(int bg_color, int fg_color, const unsigned char *pattern,
+                int op, int x, int y, int width, int height)
+{
+    /* TODO */
+    (void) bg_color;
+    (void) pattern;
+    (void) op;
+    FillRect(fg_color, x, y, width, height);
+}

@@ -49,4 +49,9 @@ void SetColor(int color);
 
 void FillScreen(int color);
 
+void DrawRect(int color, int x, int y, int width, int height);
+void FillRect(int color, int x, int y, int width, int height);
+void FillRectOp(int bg_color, int fg_color, const unsigned char *pattern,
+                int op, int x, int y, int width, int height);
+
 #endif
