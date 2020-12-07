@@ -7,6 +7,8 @@
  */
 
 #include "guikit/graphics.h"
+#include "guikit/primrect.h"
+
 #include "guikit/ansidos.h"
 #include <pc.h>
 #include <dos.h>
@@ -74,6 +76,13 @@ const unsigned char mac_pal[] = {
     0x3F, 0x19, 0x00, /* Orange */
     0x3F, 0x3C, 0x01, /* Yellow */
     0x3F, 0x3F, 0x3F  /* White */
+};
+
+static struct Rect clip = {
+    0,
+    0,
+    SCREEN_WIDTH - 1,
+    SCREEN_HEIGHT - 1
 };
 
 static unsigned long linear_ptr(unsigned long segment, unsigned long offset)
@@ -169,6 +178,107 @@ static void set_palette(const unsigned char *palette, size_t bytes)
     }
 }
 
+static void drawVertLine(int x, int y, int len)
+{
+    unsigned long dest = VGA_VIDEO_SEGMENT;
+    unsigned char line;
+    unsigned short col_in_byte;
+    struct Rect rect;
+    int ret;
+    int i;
+
+    /* Adjust clipping */
+    InitRect(&rect, x, y, 1, len);
+    ret = ClipRect(&rect, &clip);
+    if (ret == CLIP_REJECTED)
+    {
+        return;
+    }
+
+    /* Calculate start byte. */
+    /* 640 lines. 80 bytes each line. */
+    dest = linear_ptr(VGA_VIDEO_SEGMENT, rect.top * 80 + rect.left / 8);
+    col_in_byte = rect.left % 8;
+
+    /* Calculate mask for line segments. */
+    line = 0x80U >> col_in_byte;
+
+    for (i = rect.top; i <= rect.bottom; ++i)
+    {
+        _farpeekb(_dos_ds, dest); /* Load latches */
+        _farpokeb(_dos_ds, dest, line);
+        dest += 80;
+    }
+}
+
+static void drawHorizLine(int x, int y, int len)
+{
+    unsigned long dest = VGA_VIDEO_SEGMENT;
+    unsigned short col_in_byte;
+    unsigned char mask;
+    int pixels;
+    struct Rect rect;
+    int ret;
+
+    /*
+     * Adjust line to clipping region.
+     */
+    InitRect(&rect, x, y, len, 1);
+    ret = ClipRect(&rect, &clip);
+    if (ret == CLIP_REJECTED)
+    {
+        return;
+    }
+
+    /* Calculate start byte. */
+    /* 640 lines. 80 bytes each line. */
+    dest = linear_ptr(VGA_VIDEO_SEGMENT, rect.top * 80 + rect.left / 8);
+    col_in_byte = rect.left % 8; /* keep only the column in-byte address */
+
+    mask = 0;
+    pixels = rect.right - rect.left + 1;
+    while (pixels--)
+    {
+        mask |= 0x80U >> col_in_byte;
+
+        if ((col_in_byte == 7) || (pixels == 0))
+        {
+            /* We have collected a full byte. Write it. */
+            /*set_gc(GC_BIT_MASK, mask);*/ /* Only needed if in mode 0 */
+            _farpeekb(_dos_ds, dest); /* Load latches */
+            _farpokeb(_dos_ds, dest++, mask);
+            mask = 0;
+            col_in_byte = 0;
+            continue;
+        }
+
+        ++col_in_byte;
+    }
+}
+
+static void setMode3Color(int color)
+{
+    /* Set Graphics Controller into write mode 3 */
+    set_gc(GC_GRAPHICS_MODE, get_gc(GC_GRAPHICS_MODE) | 3);
+
+    /* Enable all planes */
+    set_seq(SEQ_MAP_MASK, 0xF);
+
+    /* Set color in set/reset reg */
+    set_gc(GC_ENABLE_SET_RESET, 0x0FU);
+    set_gc(GC_SET_RESET, color);
+
+    /* Set default bit mask */
+    set_gc(GC_BIT_MASK, 0xFF);
+}
+
+
+void SetColor(int color)
+{
+    /* Assume we are in Mode 3 for now. */
+    setMode3Color(color);
+}
+
 int InitGraphics()
 {
     /* 640x480 16-color */
@@ -227,4 +337,39 @@ void FreeGraphics(void)
 
     /* Return to text mode. */
     set_gfx_mode(0x03);
+}
+
+void DrawRect(int color, int x1, int y1, int width, int height)
+{
+    setMode3Color(color);
+
+    drawVertLine(x1, y1, height); /* Left */
+    drawHorizLine(x1+1, y1, width-1); /* Top */
+    drawVertLine(x1+width-1, y1+1, height-1); /* Right */
+    drawHorizLine(x1+1, y1+height-1, width - 2); /* Bottom */
+}
+
+void FillRect(int color, int x1, int y1, int width, int height)
+{
+    int y;
+
+    setMode3Color(color);
+
+    /* Fill in everywhere */
+    /* TODO do this quicker by doing this inline, having one loop instead of
+     * two. Handle the rectangle left and right edge masking here, too. */
+    for (y = 0; y < height; ++y)
+    {
+        drawHorizLine(x1, y1+y, width);
+    }
+}
+
+void FillRectOp(int bg_color, int fg_color, const unsigned char *pattern,
+                int op, int x1, int y1, int width, int height)
+{
+    /* TODO */
+    (void) bg_color;
+    (void) pattern;
+    (void) op;
+    FillRect(fg_color, x1, y1, width, height);
 }
