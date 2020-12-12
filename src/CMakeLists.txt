@@ -25,7 +25,9 @@ if(GRAPHICS STREQUAL "SDL2")
         ${SDL2_INCLUDE_DIRS}
     )
 else()
-    message("TODO Add VGA rendering")
+    target_sources(guikit PRIVATE
+        dos/graphics.c
+    )
 endif()
 
 target_compile_features(guikit PUBLIC c_std_90)
