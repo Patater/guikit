@@ -8,6 +8,7 @@
 
 #include "guikit/graphics.h"
 #include "guikit/primrect.h"
+#include <limits.h>
 
 #include "guikit/ansidos.h"
 #include <pc.h>
@@ -256,6 +257,133 @@ static void drawHorizLine(int x, int y, int len)
     }
 }
 
+static unsigned char rotate_right(unsigned char n)
+{
+    unsigned char bit;
+    bit = (n & 1) << (CHAR_BIT * sizeof(n) - 1);
+    return bit | n >> 1;
+}
+
+static unsigned char rotate_left(unsigned char n)
+{
+    unsigned char bit;
+    bit = n >> (CHAR_BIT * sizeof(n) - 1);
+    return n << 1 | bit;
+}
+
+static void drawDiagLine(int x1, int y1, int x2, int len)
+{
+    unsigned long dest = VGA_VIDEO_SEGMENT;
+    unsigned char line;
+    unsigned char orig_line;
+    unsigned short col_in_byte;
+    int i;
+    int x_start;
+    int x_end;
+    int y_start;
+    int y_end;
+    struct Rect rect;
+    int leftToRight;
+    int ret;
+
+    /* Right to left or left to right */
+    /* Assumes top to bottom */
+    y_start = y1;
+    y_end = y1 + len - 1;
+
+    if (x1 < x2)
+    {
+        x_start = x1;
+        x_end = x2;
+        leftToRight = 1;
+    }
+    else
+    {
+        x_start = x2;
+        x_end = x1;
+        leftToRight = 0;
+    }
+
+    /* Adjust clipping */
+    rect.left = x_start;
+    rect.right = x_end;
+    rect.top = y_start;
+    rect.bottom = y_end;
+    ret = ClipRect(&rect, &clip);
+    if (ret == CLIP_REJECTED)
+    {
+        return;
+    }
+
+    /* Adjust line shape based on clipping */
+    if (leftToRight)
+    {
+        rect.left += rect.top - y_start; /* new_val - orig_val */
+        rect.right -= y_end - rect.bottom;
+        rect.top += rect.left - x_start;
+        rect.bottom -= x_end - rect.right;
+    }
+    else
+    {
+        rect.right -= rect.top - y_start; /* new_val - orig_val */
+        rect.left += y_end - rect.bottom;
+        rect.bottom -= rect.left - x_start;
+        rect.top += x_end - rect.right;
+    }
+
+    /* Like vertical line, but rotating the one single present
+     * bit with each change in y */
+    if (leftToRight)
+    {
+        /* Left-to-right */
+
+        /* Calculate start byte. */
+        /* 640 lines. 80 bytes each line. */
+        dest = linear_ptr(VGA_VIDEO_SEGMENT, rect.top * 80 + rect.left / 8);
+        col_in_byte = rect.left % 8;
+
+        /* Calculate mask for line segments. */
+        orig_line = 0x80U >> col_in_byte;
+        line = orig_line;
+
+        for (i = rect.top; i <= rect.bottom; ++i)
+        {
+            _farpeekb(_dos_ds, dest); /* Load latches */
+            _farpokeb(_dos_ds, dest, line);
+            dest += 80;
+            if (line & 0x01)
+            {
+                ++dest;
+            }
+            line = rotate_right(line);
+        }
+    }
+    else
+    {
+        /* Calculate start byte. */
+        /* 640 lines. 80 bytes each line. */
+        dest = linear_ptr(VGA_VIDEO_SEGMENT, rect.top * 80 + rect.right / 8);
+        col_in_byte = rect.right % 8;
+
+        /* Calculate mask for line segments. */
+        orig_line = 0x80U >> col_in_byte;
+        line = orig_line;
+
+        /* Right-to-left */
+        for (i = rect.top; i <= rect.bottom; ++i)
+        {
+            _farpeekb(_dos_ds, dest); /* Load latches */
+            _farpokeb(_dos_ds, dest, line);
+            dest += 80;
+            if (line & 0x80)
+            {
+                --dest;
+            }
+            line = rotate_left(line);
+        }
+    }
+}
+
 static void setMode3Color(int color)
 {
     /* Set Graphics Controller into write mode 3 */
@@ -372,4 +500,321 @@ void FillRectOp(int bg_color, int fg_color, const unsigned char *pattern,
     (void) pattern;
     (void) op;
     FillRect(fg_color, x1, y1, width, height);
+}
+
+void DrawVertLine(int x1, int y1, int len)
+{
+    drawVertLine(x1, y1, len);
+}
+
+/* Test list */
+/* To verify test, set port window in vga, and read from vram. take 4 reads
+ * (one for each plane) to verify. need to write known image ahead of
+ * time to verify background not modified at any position in any plane. */
+/*
+    - Draw horizontal line length 8 at 0 0 (full width of byte, byte aligned)
+    - Draw horizontal line length 8 at 1 0 (last 7 bits first byte, first bit
+      second byte)
+    - Draw horizontal line length 7 at 1 0 (last 7 bits first byte)
+    - Draw horizontal line length 8 at 7 0 (last 1 bit first byte, first 7 bits
+      second byte)
+    - Draw horizontal line length 9 at 0 0 (full width first, 1 bit second)
+    - Draw horizontal line length 16 at 0 0 (full width first, second)
+    - Draw horizontal line length 24 at 0 0 (full width first, second, third)
+    - Draw horizontal line length 17 at 0 0 (full width first, second, 1 bit
+      third)
+    - Draw horizontal line length 16 at 1 0 (last 7 bits first, full second, 1 bit
+      third)
+*/
+void DrawHorizLine(int x1, int y1, int len)
+{
+    drawHorizLine(x1, y1, len);
+}
+
+void DrawDiagLine(int x1, int y1, int x2, int len)
+{
+    drawDiagLine(x1, y1, x2, len);
+}
+
+/* XXX We are doing run-sliced bressenham. For small lines, standard bressenham
+ * should be faster, (but only if we can figure out how to write more than 1
+ * pixel at a time from standard bressenham). */
+/* Provide standard bressenham here, too, so we can do short lines quickly,
+ * without a divide or extra setup. */
+void DrawLine(int color, int x1, int y1, int x2, int y2)
+{
+    int AdjUp; /* Error term adjust up on each advance*/
+    int AdjDown; /* Error term adjust down when error term turns over*/
+    int XAdvance; /* 1 or -1, for direction in which x advances*/
+    int YDelta;
+    int XDelta;
+    int min_run_len;
+    int final_run_len;
+    int run_len; /* aka step */
+    int errorAdj;
+
+    setMode3Color(color);
+
+    /*printf("(%03d,%03d)->(%03d,%03d)\r", x1, y1, x2, y2);*/
+
+    /* We'll draw top to bottom, to reduce the number of cases we have to
+     * handle, and to make lines between the same endpoints always draw the
+     * same pixels. */
+    /* TODO remove this, as we'll like patterned lines to work well without
+     * having to reverse the pattern. */
+    if (y1 > y2)
+    {
+        int tmp;
+
+        /* Swap y1 and y2 */
+        tmp = y1;
+        y1 = y2;
+        y2 = tmp;
+        /* Swap x1 and x2 */
+        tmp = x1;
+        x1 = x2;
+        x2 = tmp;
+    }
+    /* Now the line is top to bottom */
+
+    /* Figure out how far we're going vertically (guaranteed to be positive) */
+    YDelta = y2 - y1;
+
+    /* Figure out whether we're going left or right, and how far we're going
+     * horizontally. In the process, special-case vertical lines, for speed and
+     * to avoid nasty boundary conditions and division by 0 */
+    XDelta = x2 - x1;
+    /* Do we have a vertical line? */
+    if (XDelta == 0)
+    {
+        /* Yes, so use vertical line drawing */
+        drawVertLine(x1, y1, YDelta+1);
+        return;
+    }
+    else if (XDelta < 0)
+    {
+        /* Right to left */
+        XAdvance = -1;
+        XDelta = -XDelta; /* |XDelta| -- Make XDelta positive */
+    }
+    else
+    {
+        /* Left to right */
+        XAdvance = 1;
+    }
+
+    /* Special-case horizontal lines */
+    if (YDelta == 0)
+    {
+        if (XAdvance < 0)
+        {
+            /* Right-to-left */
+            drawHorizLine(x2, y1, XDelta+1);
+            return;
+        }
+        else
+        {
+            /* Left-to-right */
+            drawHorizLine(x1, y1, XDelta+1);
+            return;
+        }
+    }
+    /* Special-case diagonal lines */
+    else if (YDelta == XDelta)
+    {
+        drawDiagLine(x1, y1, x2, XDelta+1);
+        return;
+    }
+
+    /* Determine whether the line is X or Y major, and handle accordingly. */
+    if (XDelta > YDelta)
+    {
+        /* X-major */
+        /* More horizontal than vertical */
+
+        min_run_len = XDelta / YDelta;
+        errorAdj = XDelta % YDelta;
+        AdjUp = errorAdj + errorAdj;
+        AdjDown = YDelta + YDelta;
+
+        /* Initial error term; reflects an initial step of 0.5 along the Y
+         * axis */
+        errorAdj -= AdjDown;
+
+        /* The initial and last runs are partial, because Y advances only 0.5
+         * for these runs, rather than 1. Divide one full run, plus the initial
+         * pixel, between the initial and last runs. */
+        run_len = min_run_len / 2 + 1;
+        final_run_len = run_len;
+
+        /* If there is an odd number of pixels per run, we have one pixel that
+         * can't be allocated to either the initial or last partial run, so
+         * we'll add 0.5 to the error term so this pixel will be handled by the
+         * normal full-run loop. */
+        /* Is the run length odd? */
+        if (min_run_len & 1)
+        {
+            /* Odd length, add YDelta to error term (add 0.5 of a pixel to the
+             * error term) */
+            errorAdj += YDelta;
+        }
+        else
+        {
+            /* The basic run length is even */
+            /* If there's no fractional advance, we have one pixel that could
+             * go to either the initial or last partial run, which we'll
+             * arbitrarily allocate to the last run.*/
+            if (AdjUp == 0)
+            {
+                --run_len;
+            }
+        }
+
+        /* X-Major adjustments done now */
+
+        /* Draw the first partial run of pixels. */
+        /* XXX TODO extract out the x2 x1 choice to the outside of the loop. */
+        /* Option: make an x variable we set when we choose XAdvance, and then
+         * always use XAdvance as "1" when doing x-major
+         * Another choice is to have a horizontal line drawing function that
+         * takes Xadvance as a param, to pick to go left or right */
+        if (XAdvance < 0)
+        {
+            /* Right to left */
+            DrawHorizLine(x1-run_len+1, y1++, run_len);
+            x1 -= run_len;
+        }
+        else
+        {
+            /* Left to right */
+            DrawHorizLine(x1, y1++, run_len);
+            x1 += run_len;
+        }
+
+        /* Draw all full runs */
+        /* Are there more than 2 scans? so there are some full runs? */
+        if (YDelta < 2)
+        {
+            /* No, no full runs */
+            goto xmajor_final;
+        }
+
+        while (YDelta-- > 1) {
+            run_len = min_run_len; /* Run is at least this long */
+            /* Advance the error term and add an extra pixel if the error term
+             * so indicates. */
+            errorAdj += AdjUp;
+            if (errorAdj > 0)
+            {
+                /* One extra pixel in run */
+                ++run_len;
+                /* Reset the error term */
+                errorAdj -= AdjDown;
+            }
+            if (XAdvance < 0)
+            {
+                /* Right to left */
+                drawHorizLine(x1-run_len+1, y1++, run_len);
+                x1 -= run_len;
+            }
+            else
+            {
+                /* Left to right */
+                drawHorizLine(x1, y1++, run_len);
+                x1 += run_len;
+            }
+        }
+xmajor_final:
+        if (XAdvance < 0)
+        {
+            /* Right to left */
+            drawHorizLine(x1-final_run_len+1, y1, final_run_len);
+        }
+        else
+        {
+            /* Left to right */
+            drawHorizLine(x1, y1, final_run_len);
+        }
+        return;
+    }
+    else
+    {
+        /* Y-major */
+        /* More vertical than horizontal */
+        min_run_len = YDelta / XDelta;
+        errorAdj = YDelta % XDelta;
+        AdjUp = errorAdj + errorAdj;
+        AdjDown = XDelta + XDelta;
+
+        /* Initial error term; reflects an initial step of 0.5 along the X
+         * axis */
+        errorAdj -= AdjDown;
+
+        /* The initial and last runs are partial, because X advances only 0.5
+         * for these runs, rather than 1. Divide one full run, plus the initial
+         * pixel, between the initial and last runs. */
+        run_len = min_run_len / 2 + 1;
+        final_run_len = run_len;
+
+        /* If there is an odd number of pixels per run, we have one pixel that
+         * can't be allocated to either the initial or last partial run, so
+         * we'll add 0.5 to the error term so this pixel will be handled by the
+         * normal full-run loop. */
+        /* Is the run length odd? */
+        if (min_run_len & 1)
+        {
+            /* Odd length, add XDelta to error term (add 0.5 of a pixel to the
+             * error term) */
+            errorAdj += XDelta;
+        }
+        else
+        {
+            /* The basic run length is even */
+            /* If there's no fractional advance, we have one pixel that could
+             * go to either the initial or last partial run, which we'll
+             * arbitrarily allocate to the last run.*/
+            if (AdjUp == 0)
+            {
+                --run_len;
+            }
+        }
+
+        /* Y-Major adjustments done now */
+
+        /* Draw the first partial run of pixels. */
+        /*printf("x1,y1,len: (%d,%d,%d)\r", x1, y1, run_len);*/
+        drawVertLine(x1, y1, run_len);
+        y1 += run_len;
+        x1 += XAdvance;
+
+        /* Draw all full runs */
+        /* Are there more than 2 scans? so there are some full runs? */
+        if (XDelta < 2)
+        {
+            /* No, no full runs */
+            goto ymajor_final;
+        }
+
+        while (XDelta-- > 1) {
+            run_len = min_run_len; /* Run is at least this long */
+            /* Advance the error term and add an extra pixel if the error term
+             * so indicates. */
+            errorAdj += AdjUp;
+            if (errorAdj > 0)
+            {
+                /* One extra pixel in run */
+                ++run_len;
+                /* Reset the error term */
+                errorAdj -= AdjDown;
+            }
+            /*printf("x1,y1,len: (%d,%d,%d)\r", x1, y1, run_len);*/
+            drawVertLine(x1, y1, run_len);
+            y1 += run_len;
+            x1 += XAdvance;
+        }
+ymajor_final:
+        /*printf("x1,y1,len: (%d,%d,%d)\r", x1, y1, run_len);*/
+        drawVertLine(x1, y1, final_run_len);
+        return;
+    }
 }

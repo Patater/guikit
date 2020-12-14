@@ -54,4 +54,9 @@ void FillRect(int color, int x, int y, int width, int height);
 void FillRectOp(int bg_color, int fg_color, const unsigned char *pattern,
                 int op, int x, int y, int width, int height);
 
+void DrawVertLine(int x1, int y1, int len);
+void DrawHorizLine(int x1, int y1, int len);
+void DrawDiagLine(int x1, int y1, int x2, int len);
+void DrawLine(int color, int x1, int y1, int x2, int y2);
+
 #endif
