@@ -67,4 +67,14 @@ void FillCircle(int color, int x0, int y0, int radius);
 void DrawRoundRect(int color, int x0, int y0, int radius, int width, int height);
 void FillRoundRect(int color, int x0, int y0, int radius, int width, int height);
 
+int DrawBitmap(const struct Rect *dst, int span, const unsigned char *img,
+               const unsigned char *mask, int color);
+int DrawColorBitmap(const struct Rect *dst, int span, const unsigned char *img,
+                    const unsigned char *mask);
+
+int Blit(const unsigned char *img, const struct Rect *dst,
+         const struct Rect *src, int span);
+int BlitWithMask(const unsigned char *img, const unsigned char *mask,
+                 const struct Rect *dst, const struct Rect *src, int span);
+
 #endif
