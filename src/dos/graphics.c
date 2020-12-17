@@ -86,6 +86,8 @@ static struct Rect clip = {
     SCREEN_HEIGHT - 1
 };
 
+static int currentMode = -1;
+
 static unsigned long linear_ptr(unsigned long segment, unsigned long offset)
 {
     return segment * 16 + offset;
@@ -387,6 +389,7 @@ static void drawDiagLine(int x1, int y1, int x2, int len)
 static void setMode3Color(int color)
 {
     /* Set Graphics Controller into write mode 3 */
+    currentMode = 3;
     set_gc(GC_GRAPHICS_MODE, get_gc(GC_GRAPHICS_MODE) | 3);
 
     /* Enable all planes */
@@ -435,6 +438,7 @@ void FillScreen(int color)
     int i;
 
     /* Set write mode 0 */
+    currentMode = 0;
     set_gc(GC_GRAPHICS_MODE, get_gc(GC_GRAPHICS_MODE) & 0xFC);
 
     /* Enable all planes */
@@ -878,6 +882,7 @@ void DrawCircle(int color, int x0, int y0, int radius)
     int deltaNE;
 
     /* Set Graphics Controller into write mode 3 */
+    currentMode = 3;
     set_gc(GC_GRAPHICS_MODE, get_gc(GC_GRAPHICS_MODE) | 3);
 
     /* Enable all planes */
@@ -940,6 +945,7 @@ void FillCircle(int color, int x0, int y0, int radius)
     int deltaNE;
 
     /* Set Graphics Controller into write mode 3 */
+    currentMode = 3;
     set_gc(GC_GRAPHICS_MODE, get_gc(GC_GRAPHICS_MODE) | 3);
 
     /* Enable all planes */
@@ -1120,4 +1126,269 @@ void FillRoundRect(int color, int x0, int y0, int radius, int width,
         ++x;
         fillRoundPoints(x0, y0, radius, x, y, width, height);
     }
+}
+
+int Blit(const unsigned char *img, const struct Rect *dst0,
+         const struct Rect *src0, int span)
+{
+    unsigned long dest;
+    unsigned short odcol_in_byte;
+    unsigned short oscol_in_byte;
+    unsigned long bits;
+    unsigned long mask_bits;
+    int line;
+    size_t i;
+    int ret;
+    struct Rect dst;
+    struct Rect src;
+
+    /* Adjust clipping */
+    dst = *dst0;
+    src = *src0;
+    ret = ClipRectAdjust(&dst, &src, &clip);
+    if (ret == CLIP_REJECTED)
+    {
+        return 0;
+    }
+
+    /* Calculate start byte. */
+    /* 640 lines. 80 bytes each line. */
+    dest = linear_ptr(VGA_VIDEO_SEGMENT, dst.top * 80 + dst.left / 8);
+    odcol_in_byte = (dst.left % 8); /* keep only the column in-byte address */
+    oscol_in_byte = (src.left % 8); /* keep only the column in-byte address */
+
+    span = (span + 7) / 8; /* Convert to bytes */
+
+    for (line = src.top * span + src.left / 8;
+         line <= src.bottom * span + src.left / 8; line += span)
+    {
+        unsigned char srcbits;
+        unsigned char srcbit;
+        int pixels;
+        unsigned short dcol_in_byte;
+        unsigned short scol_in_byte;
+        size_t written;
+
+        dcol_in_byte = odcol_in_byte;
+        scol_in_byte = oscol_in_byte;
+        pixels = src.right - src.left + 1;
+        bits = 0; /* Collects bits from img */
+        mask_bits = 0; /* Collects bits from mask */
+        i = 0;
+        srcbits = img[line + i];
+        written = 0;
+        while (pixels--)
+        {
+            if (scol_in_byte == 8)
+            {
+                /* We have exhausted the img byte. Read another. */
+                ++i;
+                srcbits = img[line + i];
+                scol_in_byte = 0;
+            }
+
+            srcbit = srcbits & (0x80U >> scol_in_byte);
+            srcbit <<= scol_in_byte; /* Reset bit back to MSB. */
+            srcbit >>= dcol_in_byte; /* Shift into destination bit location. */
+            bits |= srcbit;
+
+            if ((dcol_in_byte == 7) || (pixels == 0))
+            {
+                /* We have collected a full byte. Write it. */
+
+                /* Optimization idea: Might be faster to sort into
+                same masks, then write runs with common masks, rather than
+                write the slow VGA register every byte */
+                /* XXX Do left side, middle, and right in 3 loops */
+                set_gc(GC_BIT_MASK, mask_bits);
+
+                _farpeekb(_dos_ds, dest); /* Load latches */
+                _farpokeb(_dos_ds, dest++, bits);
+                ++written;
+                bits = 0;
+                mask_bits = 0;
+                dcol_in_byte = 0;
+                ++scol_in_byte;
+                continue;
+            }
+
+            ++scol_in_byte;
+            ++dcol_in_byte;
+        }
+
+        dest += 80 - written;
+    }
+
+    return 0;
+}
+
+int BlitWithMask(const unsigned char *img, const unsigned char *mask,
+                 const struct Rect *dst0, const struct Rect *src0,
+                 int span)
+{
+    unsigned long dest;
+    unsigned short odcol_in_byte;
+    unsigned short oscol_in_byte;
+    unsigned long bits;
+    unsigned long mask_bits;
+    int line;
+    size_t i;
+    int ret;
+    struct Rect dst;
+    struct Rect src;
+
+    /* Adjust clipping */
+    dst = *dst0;
+    src = *src0;
+    ret = ClipRectAdjust(&dst, &src, &clip);
+    if (ret == CLIP_REJECTED)
+    {
+        return 0;
+    }
+
+    /* Calculate start byte. */
+    /* 640 lines. 80 bytes each line. */
+    dest = linear_ptr(VGA_VIDEO_SEGMENT, dst.top * 80 + dst.left / 8);
+    odcol_in_byte = (dst.left % 8); /* keep only the column in-byte address */
+    oscol_in_byte = (src.left % 8); /* keep only the column in-byte address */
+
+    span = (span + 7) / 8; /* Convert to bytes */
+
+    for (line = src.top * span + src.left / 8;
+         line <= src.bottom * span + src.left / 8; line += span)
+    {
+        unsigned char srcbits;
+        unsigned char srcbit;
+        unsigned char mbits;
+        unsigned char mbit;
+        int pixels;
+        unsigned short dcol_in_byte;
+        unsigned short scol_in_byte;
+        size_t written;
+
+        dcol_in_byte = odcol_in_byte;
+        scol_in_byte = oscol_in_byte;
+        pixels = src.right - src.left + 1;
+        bits = 0; /* Collects bits from img */
+        mask_bits = 0; /* Collects bits from mask */
+        i = 0;
+        srcbits = img[line + i];
+        mbits = mask[line + i];
+        written = 0;
+        while (pixels--)
+        {
+            if (scol_in_byte == 8)
+            {
+                /* We have exhausted the img byte. Read another. */
+                ++i;
+                srcbits = img[line + i];
+                mbits = mask[line + i];
+                scol_in_byte = 0;
+            }
+
+            srcbit = srcbits & (0x80U >> scol_in_byte);
+            srcbit <<= scol_in_byte; /* Reset bit back to MSB. */
+            srcbit >>= dcol_in_byte; /* Shift into destination bit location. */
+            bits |= srcbit;
+            mbit = mbits & (0x80U >> scol_in_byte);
+            mbit <<= scol_in_byte; /* Reset bit back to MSB. */
+            mbit >>= dcol_in_byte; /* Shift into destination bit location. */
+            mask_bits |= mbit;
+
+            if ((dcol_in_byte == 7) || (pixels == 0))
+            {
+                /* We have collected a full byte. Write it. */
+
+                /* Optimization idea: Might be faster to sort into
+                same masks, then write runs with common masks, rather than
+                write the slow VGA register every byte */
+                set_gc(GC_BIT_MASK, mask_bits);
+
+                _farpeekb(_dos_ds, dest); /* Load latches */
+                _farpokeb(_dos_ds, dest++, bits);
+                ++written;
+                bits = 0;
+                mask_bits = 0;
+                dcol_in_byte = 0;
+                ++scol_in_byte;
+                continue;
+            }
+
+            ++scol_in_byte;
+            ++dcol_in_byte;
+        }
+
+        dest += 80 - written;
+    }
+
+    return 0;
+}
+
+int DrawBitmap(const struct Rect *dst, int span, const unsigned char *img,
+               const unsigned char *mask, int color)
+{
+    struct Rect src;
+
+    src.left = 0;
+    src.top = 0;
+    src.right = dst->right - dst->left;
+    src.bottom = dst->bottom - dst->top;
+
+#if DEBUG
+    SerialPrintf("dst: (%d,%d)(%d,%d)\n", dst->left, dst->top, dst->right,
+                 dst->bottom);
+    SerialPrintf("src: (%d,%d)(%d,%d)\n", src.left, src.top, src.right,
+                 src.bottom);
+#endif
+
+    /* Set Graphics Controller into write mode 0 */
+    currentMode = 0;
+    set_gc(GC_GRAPHICS_MODE, get_gc(GC_GRAPHICS_MODE) & ~0x03);
+
+    /* Enable all planes */
+    set_seq(SEQ_MAP_MASK, 0xF);
+
+    /* Turn black into color, everything else white */
+    /* For each bit that is 0, CPU byte goes through OK in that plane. */
+    set_gc(GC_ENABLE_SET_RESET, color);
+    /* For other bits, we use set/reset to force them to 1. */
+    set_gc(GC_SET_RESET, 0xFU);
+
+    /* We don't need to set GC_BIT_MASK to anything, as the *Mask() function
+     * will do that as needed. */
+    return BlitWithMask(img, mask, dst, &src, span);
+}
+
+/* Input pixel format is planar 4bpp */
+int DrawColorBitmap(const struct Rect *dst, int span, const unsigned char *img,
+                    const unsigned char *mask)
+{
+    enum { PLANES = 4 };
+    int sb = (span + 7) / 8; /* Convert to bytes */
+    int h = dst->bottom - dst->top + 1;
+    int planeSize = sb * h;
+    int i;
+    struct Rect src;
+
+    src.left = 0;
+    src.top = 0;
+    src.right = dst->right - dst->left;
+    src.bottom = h - 1;
+
+    /* Set Graphics Controller into write mode 0 */
+    currentMode = 0;
+    set_gc(GC_GRAPHICS_MODE, get_gc(GC_GRAPHICS_MODE) & ~0x3U);
+
+    /* Disable set/reset */
+    set_gc(GC_ENABLE_SET_RESET, 0);
+
+    /* Blit each plane separately, using the SEQ_MAP_MASK to control which
+     * plane/bank of VRAM is written to. */
+    for (i = 0; i < PLANES; ++i)
+    {
+        set_seq(SEQ_MAP_MASK, 1 << i);
+        BlitWithMask(&img[i * planeSize], mask, dst, &src, span);
+    }
+
+    return 0;
 }

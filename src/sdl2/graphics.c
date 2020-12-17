@@ -818,3 +818,78 @@ void FillRoundRect(int color, int x0, int y0, int radius, int width,
         fillRoundPoints(x0, y0, radius, x, y, width, height);
     }
 }
+
+int BlitWithMask(const unsigned char *img, const unsigned char *mask,
+                 const struct Rect *dst, const struct Rect *src, int span)
+{
+    SDL_Surface *masked;
+    int x;
+    int y;
+    int spanBytes;
+    SDL_Rect srcRect;
+    SDL_Rect dstRect;
+    Uint8 *bitmapPixels;
+
+    spanBytes = (span + 7) / 8; /* Convert to bytes */
+
+
+    srcRect.x = src->left;
+    srcRect.y = src->top;
+    srcRect.w = src->right - src->left + 1;
+    srcRect.h = src->bottom - src->top + 1;
+
+    dstRect.x = dst->left;
+    dstRect.y = dst->top;
+    dstRect.w = dst->right - dst->left + 1;
+    dstRect.h = dst->bottom - dst->top + 1;
+
+    if (srcRect.w != dstRect.w)
+    {
+        panic("Blit width mismatch. Not supported.");
+    }
+    if (srcRect.h != dstRect.h)
+    {
+        panic("Blit height mismatch. Not supported.");
+    }
+
+    masked = SDL_CreateRGBSurfaceWithFormat(0, span, dstRect.h, 8,
+                                            SDL_PIXELFORMAT_INDEX8);
+    if (!masked)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+    SDL_SetPaletteColors(masked->format->palette, mac_pal, 0,
+                         ARRAY_SIZE(mac_pal));
+    SDL_SetColorKey(masked, SDL_TRUE, COLOR_TRANSPARENT);
+
+    /* Blit */
+    SDL_LockSurface(masked);
+    bitmapPixels = masked->pixels;
+    for (y = 0; y < dstRect.h; ++y)
+    {
+        for (x = 0; x < spanBytes; ++x)
+        {
+            Uint8 maskByte;
+            Uint8 imgByte;
+            int i;
+
+            i = y * masked->pitch + x * 8;
+
+            maskByte = mask[y * spanBytes + x];
+            imgByte = img[y * spanBytes + x];
+
+            /* Mode 0 */
+            /* Copies the white as color. black as transparent. */
+            bitmapPixels[i] = imgByte & maskByte ? COLOR_TRANSPARENT : setColor;
+            /* Mode 3 */
+            /* Like a stencil. Whereever is black is goes through to the color
+             * */
+            bitmapPixels[i] = imgByte & maskByte ? setColor : COLOR_TRANSPARENT;
+        }
+    }
+    SDL_UnlockSurface(masked);
+
+    SDL_BlitSurface(masked, &srcRect, surface, &dstRect);
+
+    return 0;
+}
