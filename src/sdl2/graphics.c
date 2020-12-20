@@ -563,3 +563,113 @@ ymajor_final:
         return;
     }
 }
+
+static void circlePoints(int x0, int y0, int x, int y)
+{
+    drawPixel(x0 + x, y0 + y);
+    drawPixel(x0 + y, y0 + x);
+    drawPixel(x0 + y, y0 - x);
+    drawPixel(x0 + x, y0 - y);
+    drawPixel(x0 - x, y0 - y);
+    drawPixel(x0 - y, y0 - x);
+    drawPixel(x0 - y, y0 + x);
+    drawPixel(x0 - x, y0 + y);
+}
+
+void DrawCircle(int color, int x0, int y0, int radius)
+{
+    int x;
+    int y;
+    int d;
+    int deltaE;
+    int deltaNE;
+
+    SetColor(color);
+
+    /* Speed this up by accumulating horizontal, diagonal, and vertical line
+     * segments. Draw each line segment reflected around in each octant. */
+
+    x = 0;
+    y = radius;
+    d = 1 - radius;
+    deltaE = 3;
+    deltaNE = -2 * radius + 5;
+    circlePoints(x0, y0, x, y);
+
+    while (y > x)
+    {
+        if (d < 0)
+        {
+            /* East */
+            d += deltaE;
+            deltaE += 2;
+            deltaNE += 2;
+        }
+        else
+        {
+            /* Northeast */
+            d += deltaNE;
+            deltaE += 2;
+            deltaNE += 4;
+            --y;
+        }
+        ++x;
+        circlePoints(x0, y0, x, y);
+    }
+}
+
+static void fillCirclePoints(int x0, int y0, int x, int y)
+{
+    /* NW to NE */
+    drawHorizLine(x0 - x, y0 - y, x + x); /* Top */
+    drawHorizLine(x0 - y, y0 - x, y + y); /* Upper middle */
+
+    /* SW to SE */
+    drawHorizLine(x0 - y, y0 + x, y + y); /* Lower middle */
+    drawHorizLine(x0 - x, y0 + y, x + x); /* Bottom */
+}
+
+void FillCircle(int color, int x0, int y0, int radius)
+{
+    int x;
+    int y;
+    int d;
+    int deltaE;
+    int deltaNE;
+
+    SetColor(color);
+
+    /* Speed this up by accumulating horizontal, diagonal, and vertical line
+     * segments. Draw each line segment reflected around in each octant. */
+    /* Speed this up by not drawing the same pixels multiple times. (Currently,
+     * any horizontal lines at the top of the circle are drawn over many times,
+     * as a specific example.) */
+
+    x = 0;
+    y = radius;
+    d = 1 - radius;
+    deltaE = 3;
+    deltaNE = -2 * radius + 5;
+    fillCirclePoints(x0, y0, x, y);
+
+    while (y > x)
+    {
+        if (d < 0)
+        {
+            /* East */
+            d += deltaE;
+            deltaE += 2;
+            deltaNE += 2;
+        }
+        else
+        {
+            /* Northeast */
+            d += deltaNE;
+            deltaE += 2;
+            deltaNE += 4;
+            --y;
+        }
+        ++x;
+        fillCirclePoints(x0, y0, x, y);
+    }
+}

@@ -59,4 +59,7 @@ void DrawHorizLine(int x1, int y1, int len);
 void DrawDiagLine(int x1, int y1, int x2, int len);
 void DrawLine(int color, int x1, int y1, int x2, int y2);
 
+void DrawCircle(int color, int x0, int y0, int radius);
+void FillCircle(int color, int x0, int y0, int radius);
+
 #endif
