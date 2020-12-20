@@ -33,6 +33,16 @@ else()
     )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "DOS")
+    target_sources(guikit PRIVATE
+        dos/debug.c
+    )
+else()
+    target_sources(guikit PRIVATE
+        sdl2/debug.c
+    )
+endif()
+
 target_compile_features(guikit PUBLIC c_std_90)
 
 enable_sanitizers(guikit)
