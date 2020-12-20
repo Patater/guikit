@@ -62,4 +62,7 @@ void DrawLine(int color, int x1, int y1, int x2, int y2);
 void DrawCircle(int color, int x0, int y0, int radius);
 void FillCircle(int color, int x0, int y0, int radius);
 
+void DrawRoundRect(int color, int x0, int y0, int radius, int width, int height);
+void FillRoundRect(int color, int x0, int y0, int radius, int width, int height);
+
 #endif

@@ -673,3 +673,134 @@ void FillCircle(int color, int x0, int y0, int radius)
         fillCirclePoints(x0, y0, x, y);
     }
 }
+
+static void roundPoints(int x0, int y0, int radius, int x, int y, int width, int height)
+{
+    /* SE */
+    drawPixel(x0 + x + width - radius - 1, y0 + y + height - radius - 1);
+    drawPixel(x0 + y + width - radius - 1, y0 + x + height - radius - 1);
+
+    /* NE */
+    drawPixel(x0 + y + width - radius - 1, y0 - x + radius);
+    drawPixel(x0 + x + width - radius - 1, y0 - y + radius);
+
+    /* NW */
+    drawPixel(x0 - x + radius, y0 - y + radius);
+    drawPixel(x0 - y + radius, y0 - x + radius);
+
+    /* SW */
+    drawPixel(x0 - y + radius, y0 + x + height - radius - 1);
+    drawPixel(x0 - x + radius, y0 + y + height - radius - 1);
+}
+
+void DrawRoundRect(int color, int x0, int y0, int radius, int width, int height)
+{
+    int x;
+    int y;
+    int d;
+    int deltaE;
+    int deltaNE;
+
+    /* TODO Fix crash when radius is more curvy than a circle is allowed to be
+     * */
+
+    SetColor(color);
+
+    /* Draw rectangle portion, without corners */
+    drawVertLine(x0, y0 + radius + 1, height - 2 - 2 * radius); /* Left */
+    drawHorizLine(x0 + 1 + radius, y0, width - 2 - 2 * radius); /* Top */
+    drawVertLine(x0 + width - 1, y0 + radius + 1,
+                 height - 2 - 2 * radius); /* Right */
+    drawHorizLine(x0 + 1 + radius, y0 + height - 1,
+                  width - 2 - 2 * radius); /* Bottom */
+
+    /* Same as DrawCircle(), but with roundPoints() */
+    x = 0;
+    y = radius;
+    d = 1 - radius;
+    deltaE = 3;
+    deltaNE = -2 * radius + 5;
+    roundPoints(x0, y0, radius, x, y, width, height);
+
+    while (y > x)
+    {
+        if (d < 0)
+        {
+            /* East */
+            d += deltaE;
+            deltaE += 2;
+            deltaNE += 2;
+        }
+        else
+        {
+            /* Northeast */
+            d += deltaNE;
+            deltaE += 2;
+            deltaNE += 4;
+            --y;
+        }
+        ++x;
+        roundPoints(x0, y0, radius, x, y, width, height);
+    }
+}
+
+static void fillRoundPoints(int x0, int y0, int radius, int x, int y, int width, int height)
+{
+    /* NW to NE */
+    drawHorizLine(x0 - x + radius, y0 - y + radius,
+                  (x0 + x + width - radius) - (x0 - x + radius)); /* Top */
+    drawHorizLine(x0 - y + radius, y0 - x + radius,
+                  (x0 + y + width - radius) -
+                      (x0 - y + radius)); /* Upper middle */
+
+    /* SW to SE */
+    drawHorizLine(x0 - y + radius, y0 + x + height - radius - 1,
+                  (x0 + y + width - radius) -
+                      (x0 - y + radius)); /* Lower middle */
+    drawHorizLine(x0 - x + radius, y0 + y + height - radius - 1,
+                  (x0 + x + width - radius) - (x0 - x + radius)); /* Bottom */
+}
+
+void FillRoundRect(int color, int x0, int y0, int radius, int width,
+                   int height)
+{
+    int x;
+    int y;
+    int d;
+    int deltaE;
+    int deltaNE;
+
+    SetColor(color);
+
+    /* Use FillRect() to set mode for us, and avoid extra register setting */
+    FillRect(color, x0, y0 + radius + 1, width,
+             height - radius - radius - 2); /* Middle */
+
+    x = 0;
+    y = radius;
+    d = 1 - radius;
+    deltaE = 3;
+    deltaNE = -2 * radius + 5;
+    fillRoundPoints(x0, y0, radius, x, y, width, height);
+
+    while (y > x)
+    {
+        if (d < 0)
+        {
+            /* East */
+            d += deltaE;
+            deltaE += 2;
+            deltaNE += 2;
+        }
+        else
+        {
+            /* Northeast */
+            d += deltaNE;
+            deltaE += 2;
+            deltaNE += 4;
+            --y;
+        }
+        ++x;
+        fillRoundPoints(x0, y0, radius, x, y, width, height);
+    }
+}
