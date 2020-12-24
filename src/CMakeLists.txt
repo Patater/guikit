@@ -3,6 +3,7 @@ include(../cmake/Coverage.cmake)
 include(../cmake/Warnings.cmake)
 
 add_library(guikit
+    bmp.c
     hash.c
     hashmap.c
     intern.c
