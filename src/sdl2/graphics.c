@@ -35,6 +35,8 @@ static const struct SDL_Color mac_pal[] = {
     {0xFF, 0x00, 0xFF, 0x00}  /* Transparent */
 };
 
+const unsigned char blackPattern[] = {0, 0, 0, 0, 0, 0, 0, 0};
+
 static SDL_Window *window;
 static SDL_Surface *screen;
 static SDL_Surface *surface;
@@ -42,6 +44,9 @@ static Uint8 *pixels;
 static int pitch;
 static Uint32 penColor;
 static int setColor;
+
+/* An 8x8 1-bit bitmap, packed 1bpp */
+static const unsigned char *currentPattern;
 
 static Uint32 surfaceColor(int color)
 {
@@ -54,6 +59,9 @@ static Uint32 surfaceColor(int color)
 int InitGraphics(void)
 {
     int ret;
+
+    currentPattern = blackPattern;
+
     ret = SDL_Init(SDL_INIT_VIDEO);
     if (ret < 0)
     {
@@ -891,6 +899,160 @@ int BlitWithMask(const unsigned char *img, const unsigned char *mask,
     SDL_UnlockSurface(masked);
 
     SDL_BlitSurface(masked, &srcRect, surface, &dstRect);
+
+    return 0;
+}
+
+static unsigned char get_op(int op, const unsigned char src,
+                            const unsigned char *pat, size_t row)
+{
+    unsigned char p = pat[row % 8];
+    unsigned char byte = src & 0xFF;
+    switch (op)
+    {
+    case OP_SRC_INV:
+        byte = ~byte;
+        break;
+    case OP_SRC_INV_PAT_XOR:
+        byte = ~byte ^ p;
+        break;
+    case OP_PAT_AND:
+        byte &= p;
+        break;
+    case OP_SRC_INV_PAT_AND:
+        byte = ~byte & p;
+        break;
+    case OP_PAT_NOT:
+        byte &= ~p;
+        break;
+    case OP_PAT_OR:
+        byte |= p;
+        break;
+    case OP_SRC_INV_PAT_OR:
+        byte = ~byte | p;
+        break;
+    case OP_PAT_XOR:
+        byte ^= p;
+        break;
+    case OP_NONE:
+    default:
+        break;
+    }
+
+    return byte;
+}
+
+int Blit(const unsigned char *img, const struct Rect *dst0,
+         const struct Rect *src0, int span)
+{
+    return BlitOp(img, OP_NONE, dst0, src0, span);
+}
+
+int BlitOp(const unsigned char *img, int op, const struct Rect *dst0,
+           const struct Rect *src0, int span)
+{
+    SDL_Surface *colored;
+    int x;
+    int y;
+    int srcWidth;
+    int srcHeight;
+    int dstWidth;
+    int dstHeight;
+    int spanBytes;
+    SDL_Rect srcRect;
+    SDL_Rect dstRect;
+    Uint8 *bitmapPixels;
+    int colInByte;
+    size_t row;
+
+    spanBytes = (span + 7) / 8; /* Convert to bytes */
+
+    srcWidth = src0->right - src0->left + 1;
+    srcHeight = src0->bottom - src0->top + 1;
+    dstWidth = dst0->right - dst0->left + 1;
+    dstHeight = dst0->bottom - dst0->top + 1;
+    if (srcWidth != dstWidth)
+    {
+        panic("Blit width mismatch. Not supported.");
+    }
+    if (srcHeight != dstHeight)
+    {
+        panic("Blit height mismatch. Not supported.");
+    }
+
+    srcRect.x = 0;
+    srcRect.y = 0;
+    srcRect.w = srcWidth;
+    srcRect.h = srcHeight;
+
+    dstRect.x = dst0->left;
+    dstRect.y = dst0->top;
+    dstRect.w = dstWidth;
+    dstRect.h = dstHeight;
+
+    colored = SDL_CreateRGBSurfaceWithFormat(0, span, dstHeight, 8,
+                                             SDL_PIXELFORMAT_INDEX8);
+    if (!colored)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+    SDL_SetPaletteColors(colored->format->palette, mac_pal, 0,
+                         ARRAY_SIZE(mac_pal));
+    SDL_SetColorKey(colored, SDL_TRUE, COLOR_TRANSPARENT);
+
+    /* Blit */
+    /* Make a new texture from the 1-bit bitmap, colorizing it along the way.
+     * */
+    SDL_LockSurface(colored);
+    bitmapPixels = colored->pixels;
+    colInByte = src0->left % 8; /* keep only the column in-byte address */
+
+    /* If x starts at 3 pixels in, we want pixel numbers 2 3 4 5 6 7 0 1 in
+     * that order, where 0 and 1 are from the next byte. */
+    row = 0;
+    for (y = 0; y < srcHeight; ++y)
+    {
+        int curColInByte;
+        const Uint8 *imgByte;
+        Uint8 byte;
+
+        curColInByte = colInByte;
+        imgByte = &img[(y + src0->top) * spanBytes + src0->left / 8];
+
+        for (x = 0; x < srcWidth; ++x)
+        {
+            int i;
+            int mask;
+            int shift;
+            unsigned char src;
+
+            i = y * colored->pitch + x;
+            src = *imgByte;
+            byte = get_op(op, src, currentPattern, row);
+            shift = 7 - curColInByte;
+            mask = 1 << shift;
+
+            /* Mode 0 */
+            /* Copies the white as color. black as transparent. */
+            bitmapPixels[i] = byte & mask ? COLOR_TRANSPARENT : setColor;
+            /* Mode 3 */
+            /* Like a stencil. Whereever is black is goes through to the color
+             * */
+            bitmapPixels[i] = byte & mask ? setColor : COLOR_TRANSPARENT;
+
+            ++curColInByte;
+            if (curColInByte == 8)
+            {
+                curColInByte = 0;
+                ++imgByte;
+            }
+        }
+        ++row;
+    }
+    SDL_UnlockSurface(colored);
+
+    /* Copy from the new texture onto our main graphics surface. */
+    SDL_BlitSurface(colored, &srcRect, surface, &dstRect);
 
     return 0;
 }

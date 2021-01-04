@@ -38,6 +38,20 @@ enum {
     NUM_COLORS
 };
 
+/* Drawing operations */
+enum {
+    OP_NONE,
+    OP_SRC_INV,
+    OP_PAT_AND,
+    OP_PAT_NOT,
+    OP_PAT_OR,
+    OP_PAT_XOR,
+    OP_SRC_INV_PAT_XOR,
+    OP_SRC_INV_PAT_OR,
+    OP_SRC_INV_PAT_AND,
+    NUM_OP
+};
+
 int InitGraphics(void);
 void FreeGraphics(void);
 
@@ -74,6 +88,8 @@ int DrawColorBitmap(const struct Rect *dst, int span, const unsigned char *img,
 
 int Blit(const unsigned char *img, const struct Rect *dst,
          const struct Rect *src, int span);
+int BlitOp(const unsigned char *img, int op, const struct Rect *dst0,
+           const struct Rect *src0, int span);
 int BlitWithMask(const unsigned char *img, const unsigned char *mask,
                  const struct Rect *dst, const struct Rect *src, int span);
 
