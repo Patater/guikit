@@ -86,6 +86,11 @@ static struct Rect clip = {
     SCREEN_HEIGHT - 1
 };
 
+/* An 8x8 1-bit bitmap, packed 1bpp */
+static const unsigned char *currentPattern;
+
+const unsigned char blackPattern[] = {0, 0, 0, 0, 0, 0, 0, 0};
+
 static int currentMode = -1;
 
 static unsigned long linear_ptr(unsigned long segment, unsigned long offset)
@@ -416,6 +421,8 @@ int InitGraphics()
     set_gfx_mode(0x12);
 
     set_palette(mac_pal, sizeof(mac_pal));
+
+    currentPattern = blackPattern;
 
     /* Reset the data rotate and bit mask registers. */
     /* XXX Maybe not needed after mode set. */
@@ -1128,8 +1135,96 @@ void FillRoundRect(int color, int x0, int y0, int radius, int width,
     }
 }
 
+#if 0
+static unsigned char apply_op(unsigned char byte, int op,
+                              const unsigned char *pattern, size_t row)
+{
+    unsigned char p = pattern[row % 8];
+    switch (op)
+    {
+    case OP_SRC_INV:
+        byte = ~byte;
+        break;
+    case OP_SRC_INV_PAT_XOR:
+        byte = ~byte ^ p;
+        break;
+    case OP_PAT_AND:
+        byte &= p;
+        break;
+    case OP_SRC_INV_PAT_AND:
+        byte = ~byte & p;
+        break;
+    case OP_PAT_NOT:
+        byte &= ~p;
+        break;
+    case OP_PAT_OR:
+        byte |= p;
+        break;
+    case OP_SRC_INV_PAT_OR:
+        byte = ~byte | p;
+        break;
+    case OP_PAT_XOR:
+        byte ^= p;
+        break;
+    case OP_NONE:
+    default:
+        break;
+    }
+
+    return byte;
+}
+#endif
+
+static unsigned char get_op(int op, const unsigned char *src, size_t i,
+                            const unsigned char *pat, size_t row)
+{
+    unsigned char p = pat[row % 8];
+#if 0
+    unsigned char byte = ~src[i] & 0xFF; /* ?!?! */
+#endif
+    unsigned char byte = src[i] & 0xFF; /* ?!?! */
+    switch (op)
+    {
+    case OP_SRC_INV:
+        byte = ~byte;
+        break;
+    case OP_SRC_INV_PAT_XOR:
+        byte = ~byte ^ p;
+        break;
+    case OP_PAT_AND:
+        byte &= p;
+        break;
+    case OP_SRC_INV_PAT_AND:
+        byte = ~byte & p;
+        break;
+    case OP_PAT_NOT:
+        byte &= ~p;
+        break;
+    case OP_PAT_OR:
+        byte |= p;
+        break;
+    case OP_SRC_INV_PAT_OR:
+        byte = ~byte | p;
+        break;
+    case OP_PAT_XOR:
+        byte ^= p;
+        break;
+    case OP_NONE:
+    default:
+        break;
+    }
+
+    return byte;
+}
+
 int Blit(const unsigned char *img, const struct Rect *dst0,
          const struct Rect *src0, int span)
+{
+    return BlitOp(img, OP_NONE, dst0, src0, span);
+}
+
+int BlitOp(const unsigned char *img, int op, const struct Rect *dst0,
+           const struct Rect *src0, int span)
 {
     unsigned long dest;
     unsigned short odcol_in_byte;
@@ -1137,6 +1232,7 @@ int Blit(const unsigned char *img, const struct Rect *dst0,
     unsigned long bits;
     unsigned long mask_bits;
     int line;
+    size_t row;
     size_t i;
     int ret;
     struct Rect dst;
@@ -1159,11 +1255,13 @@ int Blit(const unsigned char *img, const struct Rect *dst0,
 
     span = (span + 7) / 8; /* Convert to bytes */
 
+    row = src.top;
     for (line = src.top * span + src.left / 8;
          line <= src.bottom * span + src.left / 8; line += span)
     {
         unsigned char srcbits;
         unsigned char srcbit;
+        unsigned char mbit;
         int pixels;
         unsigned short dcol_in_byte;
         unsigned short scol_in_byte;
@@ -1175,7 +1273,7 @@ int Blit(const unsigned char *img, const struct Rect *dst0,
         bits = 0; /* Collects bits from img */
         mask_bits = 0; /* Collects bits from mask */
         i = 0;
-        srcbits = img[line + i];
+        srcbits = get_op(op, img, line + i, currentPattern, row);
         written = 0;
         while (pixels--)
         {
@@ -1183,7 +1281,7 @@ int Blit(const unsigned char *img, const struct Rect *dst0,
             {
                 /* We have exhausted the img byte. Read another. */
                 ++i;
-                srcbits = img[line + i];
+                srcbits = get_op(op, img, line + i, currentPattern, row);
                 scol_in_byte = 0;
             }
 
@@ -1191,16 +1289,21 @@ int Blit(const unsigned char *img, const struct Rect *dst0,
             srcbit <<= scol_in_byte; /* Reset bit back to MSB. */
             srcbit >>= dcol_in_byte; /* Shift into destination bit location. */
             bits |= srcbit;
+            mbit = 0xFF & (0x80U >> scol_in_byte);
+            mbit <<= scol_in_byte; /* Reset bit back to MSB. */
+            mbit >>= dcol_in_byte; /* Shift into destination bit location. */
+            mask_bits |= mbit;
 
             if ((dcol_in_byte == 7) || (pixels == 0))
             {
                 /* We have collected a full byte. Write it. */
-
                 /* Optimization idea: Might be faster to sort into
                 same masks, then write runs with common masks, rather than
                 write the slow VGA register every byte */
                 /* XXX Do left side, middle, and right in 3 loops */
-                set_gc(GC_BIT_MASK, mask_bits);
+                /*set_gc(GC_BIT_MASK, mask_bits);*/
+
+                /*bits = apply_op(bits, op, currentPattern, row);*/
 
                 _farpeekb(_dos_ds, dest); /* Load latches */
                 _farpokeb(_dos_ds, dest++, bits);
@@ -1217,6 +1320,7 @@ int Blit(const unsigned char *img, const struct Rect *dst0,
         }
 
         dest += 80 - written;
+        ++row;
     }
 
     return 0;
