@@ -7,6 +7,7 @@ add_library(guikit
     hashmap.c
     panic.c
     pmemory.c
+    primrect.c
 )
 
 target_include_directories(guikit
