@@ -23,7 +23,7 @@ static int hash_test_chongo(void)
 static int hash_test_deadbeef(void)
 {
     unsigned long h;
-    unsigned char test[] = {0xde, 0xad, 0xbe, 0xef, 0x00, 0xa5, 0x5a};
+    char test[] = {-34, -83, -66, -17, 0, -91, 90};
 
     h = hash(test, 0);
     TEST_EQU(h, 0x811c9dc5UL);
