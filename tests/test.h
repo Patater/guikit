@@ -176,21 +176,21 @@ enum
     } while (0)
 
 /* Signed comparison */
-#define TEST_EQ(a, b) TEST_EQ_T(a, b, ptrdiff_t, %ld)
-#define TEST_NE(a, b) TEST_NE_T(a, b, ptrdiff_t, %ld)
-#define TEST_GT(a, b) TEST_GT_T(a, b, ptrdiff_t, %ld)
-#define TEST_LT(a, b) TEST_LT_T(a, b, ptrdiff_t, %ld)
-#define TEST_GE(a, b) TEST_GE_T(a, b, ptrdiff_t, %ld)
-#define TEST_LE(a, b) TEST_LE_T(a, b, ptrdiff_t, %ld)
+#define TEST_EQ(a, b) TEST_EQ_T(a, b, long, %ld)
+#define TEST_NE(a, b) TEST_NE_T(a, b, long, %ld)
+#define TEST_GT(a, b) TEST_GT_T(a, b, long, %ld)
+#define TEST_LT(a, b) TEST_LT_T(a, b, long, %ld)
+#define TEST_GE(a, b) TEST_GE_T(a, b, long, %ld)
+#define TEST_LE(a, b) TEST_LE_T(a, b, long, %ld)
 
 /* Unsigned comparison */
-#define TEST_EQU(a, b) TEST_EQ_T(a, b, size_t, %lu)
-#define TEST_EQX(a, b) TEST_EQ_T(a, b, size_t, 0x%lX)
-#define TEST_NEU(a, b) TEST_NE_T(a, b, size_t, %lu)
-#define TEST_GTU(a, b) TEST_GT_T(a, b, size_t, %lu)
-#define TEST_LTU(a, b) TEST_LT_T(a, b, size_t, %lu)
-#define TEST_GEU(a, b) TEST_GE_T(a, b, size_t, %lu)
-#define TEST_LEU(a, b) TEST_LE_T(a, b, size_t, %lu)
+#define TEST_EQU(a, b) TEST_EQ_T(a, b, unsigned long, %lu)
+#define TEST_EQX(a, b) TEST_EQ_T(a, b, unsigned long, 0x%lX)
+#define TEST_NEU(a, b) TEST_NE_T(a, b, unsigned long, %lu)
+#define TEST_GTU(a, b) TEST_GT_T(a, b, unsigned long, %lu)
+#define TEST_LTU(a, b) TEST_LT_T(a, b, unsigned long, %lu)
+#define TEST_GEU(a, b) TEST_GE_T(a, b, unsigned long, %lu)
+#define TEST_LEU(a, b) TEST_LE_T(a, b, unsigned long, %lu)
 
 /* Pointer comparison */
 #define TEST_EQP(a, b) TEST_EQ_T(a, b, void *, %p)
