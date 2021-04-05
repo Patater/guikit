@@ -14,3 +14,4 @@ endif()
 set(GRAPHICS "SDL2" CACHE STRING "Graphics rendering backend")
 
 add_subdirectory(src)
+add_subdirectory(apps)
