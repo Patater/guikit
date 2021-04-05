@@ -10,4 +10,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_subdirectory(tests)
 endif()
 
+# Set the default graphics rendering backend
+set(GRAPHICS "SDL2" CACHE STRING "Graphics rendering backend")
+
 add_subdirectory(src)
