@@ -8,32 +8,31 @@
 
 #include "guikit/graphics.h"
 #include "guikit/prandom.h"
+#include "guikit/primrect.h"
 #include "guikit/panic.h"
 #include <stdio.h>
 
 void RandomRects(int num)
 {
     int color;
-    int x;
-    int y;
-    int w;
-    int h;
     int i;
 
     for (i = 0; i < num; ++i)
     {
+        struct Rect rect;
         color = RandRange(0, NUM_COLORS - 1);
-        x = RandRange(-10, SCREEN_WIDTH + 9);
-        y = RandRange(-10, SCREEN_HEIGHT + 9);
-        w = RandRange(-10, SCREEN_WIDTH + 9);
-        h = RandRange(-10, SCREEN_HEIGHT + 9);
+        rect.left = RandRange(-10, SCREEN_WIDTH + 9);
+        rect.top = RandRange(-10, SCREEN_HEIGHT + 9);
+        rect.right = RandRange(-10, SCREEN_WIDTH + 9);
+        rect.bottom = RandRange(-10, SCREEN_HEIGHT + 9);
+        NormalizedRect(&rect, &rect);
         if (RandRange(0, 1) == 0)
         {
-            FillRect(color, x, y, w, h);
+            FillRect(color, &rect);
         }
         else
         {
-            DrawRect(color, x, y, w, h);
+            DrawRect(color, &rect);
         }
         ShowGraphics();
     }

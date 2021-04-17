@@ -11,6 +11,8 @@
 
 #include <stddef.h>
 
+struct Rect;
+
 /* VGA resolution (in Mode 0x12) */
 enum {
     SCREEN_WIDTH = 640,
@@ -51,10 +53,10 @@ void SetColor(int color);
 
 void FillScreen(int color);
 
-void DrawRect(int color, int x, int y, int width, int height);
-void FillRect(int color, int x, int y, int width, int height);
+void DrawRect(int color, const struct Rect *rect);
+void FillRect(int color, const struct Rect *rect);
 void FillRectOp(int bg_color, int fg_color, const unsigned char *pattern,
-                int op, int x, int y, int width, int height);
+                int op, const struct Rect *rect);
 
 void DrawVertLine(int x1, int y1, int len);
 void DrawHorizLine(int x1, int y1, int len);

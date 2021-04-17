@@ -8,6 +8,7 @@
 
 #include "guikit/graphics.h"
 #include "guikit/panic.h"
+#include "guikit/primrect.h"
 #include <SDL.h>
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
@@ -149,9 +150,19 @@ static void drawHorizLine(int x, int y, int len)
     SDL_FillRect(surface, &r, penColor);
 }
 
-void DrawRect(int color, int x, int y, int width, int height)
+void DrawRect(int color, const struct Rect *rect)
 {
+    int x;
+    int y;
+    int width;
+    int height;
+
     SetColor(color);
+
+    x = rect->left;
+    y = rect->top;
+    width = rect->right - rect->left + 1;
+    height = rect->bottom - rect->top + 1;
 
     drawVertLine(x, y, height); /* Left */
     drawHorizLine(x + 1, y, width - 1); /* Top */
@@ -159,27 +170,27 @@ void DrawRect(int color, int x, int y, int width, int height)
     drawHorizLine(x + 1, y + height - 1, width - 2); /* Bottom */
 }
 
-void FillRect(int color, int x, int y, int width, int height)
+void FillRect(int color, const struct Rect *rect)
 {
     SDL_Rect r;
 
-    r.x = x;
-    r.y = y;
-    r.w = width;
-    r.h = height;
+    r.x = rect->left;
+    r.y = rect->top;
+    r.w = rect->right - rect->left + 1;
+    r.h = rect->bottom - rect->top + 1;
 
     SetColor(color);
     SDL_FillRect(surface, &r, penColor);
 }
 
 void FillRectOp(int bg_color, int fg_color, const unsigned char *pattern,
-                int op, int x, int y, int width, int height)
+                int op, const struct Rect *rect)
 {
     /* TODO */
     (void) bg_color;
     (void) pattern;
     (void) op;
-    FillRect(fg_color, x, y, width, height);
+    FillRect(fg_color, rect);
 }
 
 void DrawVertLine(int x1, int y1, int len)
@@ -768,12 +779,16 @@ void FillRoundRect(int color, int x0, int y0, int radius, int width,
     int d;
     int deltaE;
     int deltaNE;
+    struct Rect rect;
 
     SetColor(color);
 
     /* Use FillRect() to set mode for us, and avoid extra register setting */
-    FillRect(color, x0, y0 + radius + 1, width,
-             height - radius - radius - 2); /* Middle */
+    rect.left = x0;
+    rect.top = y0 + radius + 1;
+    rect.right = rect.left + width - 1;
+    rect.bottom = rect.top + height - radius - radius - 2 - 1;
+    FillRect(color, &rect);
 
     x = 0;
     y = radius;

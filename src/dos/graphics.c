@@ -467,8 +467,18 @@ void FreeGraphics(void)
     set_gfx_mode(0x03);
 }
 
-void DrawRect(int color, int x1, int y1, int width, int height)
+void DrawRect(int color, const struct Rect *rect)
 {
+    int x1;
+    int y1;
+    int width;
+    int height;
+
+    x1 = rect->left;
+    y1 = rect->top;
+    width = rect->right + 1 - rect->left;
+    height = rect->bottom + 1 - rect->top;
+
     setMode3Color(color);
 
     drawVertLine(x1, y1, height); /* Left */
@@ -477,29 +487,32 @@ void DrawRect(int color, int x1, int y1, int width, int height)
     drawHorizLine(x1+1, y1+height-1, width - 2); /* Bottom */
 }
 
-void FillRect(int color, int x1, int y1, int width, int height)
+void FillRect(int color, const struct Rect *rect)
 {
     int y;
+    int width;
+
+    width = rect->right - rect->left + 1;
 
     setMode3Color(color);
 
     /* Fill in everywhere */
     /* TODO do this quicker by doing this inline, having one loop instead of
      * two. Handle the rectangle left and right edge masking here, too. */
-    for (y = 0; y < height; ++y)
+    for (y = rect->top; y <= rect->bottom; ++y)
     {
-        drawHorizLine(x1, y1+y, width);
+        drawHorizLine(rect->left, y, width);
     }
 }
 
 void FillRectOp(int bg_color, int fg_color, const unsigned char *pattern,
-                int op, int x1, int y1, int width, int height)
+                int op, const struct Rect *rect)
 {
     /* TODO */
     (void) bg_color;
     (void) pattern;
     (void) op;
-    FillRect(fg_color, x1, y1, width, height);
+    FillRect(fg_color, rect);
 }
 
 void DrawVertLine(int x1, int y1, int len)
@@ -1071,11 +1084,14 @@ void FillRoundRect(int color, int x0, int y0, int radius, int width,
     int d;
     int deltaE;
     int deltaNE;
-
+    struct Rect rect;
 
     /* Use FillRect() to set mode for us, and avoid extra register setting */
-    FillRect(color, x0, y0 + radius + 1, width,
-             height - radius - radius - 2); /* Middle */
+    rect.left = x0;
+    rect.top = y0 + radius + 1;
+    rect.right = rect.left + width - 1;
+    rect.bottom = rect.top + height - radius - radius - 2 - 1;
+    FillRect(color, &rect); /* Middle */
 
     x = 0;
     y = radius;
