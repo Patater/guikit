@@ -68,6 +68,8 @@ int InitGraphics(void)
         panic("SDL Error: %s\n", SDL_GetError());
     }
 
+    SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1", SDL_HINT_OVERRIDE);
+
     window = SDL_CreateWindow("Patater GUI Kit", SDL_WINDOWPOS_UNDEFINED,
                   SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
                   0 /* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
