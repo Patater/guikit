@@ -25,3 +25,10 @@ add_executable(test_primrect
 )
 target_link_libraries(test_primrect guikit)
 add_test(NAME primrect COMMAND test_primrect)
+
+add_executable(test_array
+    array.c
+    test.c
+)
+target_link_libraries(test_array guikit)
+add_test(NAME array COMMAND test_array)
