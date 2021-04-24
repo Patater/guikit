@@ -33,6 +33,7 @@ enum {
 
 void InitRect(struct Rect *rect, int x, int y, int w, int h);
 void RectFromLine(struct Rect *rect, int x0, int y0, int x1, int y1);
+void NormalizedRect(struct Rect *rect, const struct Rect *r);
 void ConvertRect(const struct Rect *rect, int *x, int *y, int *w, int *h);
 
 int RectUnion(const struct Rect *a, const struct Rect *b,

@@ -35,6 +35,11 @@ void RectFromLine(struct Rect *rect, int x0, int y0, int x1, int y1)
     rect->bottom = max(y0, y1);
 }
 
+void NormalizedRect(struct Rect *rect, const struct Rect *r)
+{
+    RectFromLine(rect, r->left, r->top, r->right, r->bottom);
+}
+
 static int RectIsEmpty(const struct Rect *rect)
 {
     /* XXX Change this when making bottom inclusive */

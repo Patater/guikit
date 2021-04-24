@@ -653,6 +653,78 @@ int rectIntersectNoOverlap(void)
     return 0;
 }
 
+int rectNormalizedReverseX(void)
+{
+    struct Rect r;
+    r.left = 441;
+    r.top = 242;
+    r.right = 378;
+    r.bottom = 266;
+
+    NormalizedRect(&r, &r);
+
+    TEST_EQ(r.left, 378);
+    TEST_EQ(r.top, 242);
+    TEST_EQ(r.right, 441);
+    TEST_EQ(r.bottom, 266);
+
+    return 0;
+}
+
+int rectNormalizedForwardX(void)
+{
+    struct Rect r;
+    r.left = 378;
+    r.top = 242;
+    r.right = 441;
+    r.bottom = 266;
+
+    NormalizedRect(&r, &r);
+
+    TEST_EQ(r.left, 378);
+    TEST_EQ(r.top, 242);
+    TEST_EQ(r.right, 441);
+    TEST_EQ(r.bottom, 266);
+
+    return 0;
+}
+
+int rectNormalizedReverseY(void)
+{
+    struct Rect r;
+    r.left = 378;
+    r.top = 266;
+    r.right = 441;
+    r.bottom = 242;
+
+    NormalizedRect(&r, &r);
+
+    TEST_EQ(r.left, 378);
+    TEST_EQ(r.top, 242);
+    TEST_EQ(r.right, 441);
+    TEST_EQ(r.bottom, 266);
+
+    return 0;
+}
+
+int rectNormalizedForwardY(void)
+{
+    struct Rect r;
+    r.left = 378;
+    r.top = 242;
+    r.right = 441;
+    r.bottom = 266;
+
+    NormalizedRect(&r, &r);
+
+    TEST_EQ(r.left, 378);
+    TEST_EQ(r.top, 242);
+    TEST_EQ(r.right, 441);
+    TEST_EQ(r.bottom, 266);
+
+    return 0;
+}
+
 const test_fn tests[] =
 {
     rectangleIsClippedNW,
@@ -683,5 +755,11 @@ const test_fn tests[] =
     rectUnionWithEmptyFirstIsSelf,
     rectIntersectOverlap,
     rectIntersectNoOverlap,
+
+    rectNormalizedReverseX,
+    rectNormalizedForwardX,
+    rectNormalizedReverseY,
+    rectNormalizedForwardY,
+
     0
 };
