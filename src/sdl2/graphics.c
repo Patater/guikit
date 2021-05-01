@@ -1057,3 +1057,239 @@ int BlitOp(const unsigned char *img, int op, const struct Rect *dst0,
 
     return 0;
 }
+
+int DrawBitmap(const struct Rect *dst, int span, const unsigned char *img,
+               const unsigned char *mask, int color)
+{
+    SDL_Surface *masked;
+    int x;
+    int y;
+    int width;
+    int height;
+    int spanBytes;
+    SDL_Rect srcRect;
+    SDL_Rect dstRect;
+    Uint8 *bitmapPixels;
+
+    spanBytes = (span + 7) / 8; /* Convert to bytes */
+
+    width = dst->right - dst->left + 1;
+    height = dst->bottom - dst->top + 1;
+
+    srcRect.x = 0;
+    srcRect.y = 0;
+    srcRect.w = width;
+    srcRect.h = height;
+
+    dstRect.x = dst->left;
+    dstRect.y = dst->top;
+    dstRect.w = width;
+    dstRect.h = height;
+
+    masked = SDL_CreateRGBSurfaceWithFormat(0, span, height, 8,
+                                            SDL_PIXELFORMAT_INDEX8);
+    if (!masked)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+    SDL_SetPaletteColors(masked->format->palette, mac_pal, 0,
+                         ARRAY_SIZE(mac_pal));
+    SDL_SetColorKey(masked, SDL_TRUE, COLOR_TRANSPARENT);
+
+    /* Blit */
+    SDL_LockSurface(masked);
+    bitmapPixels = masked->pixels;
+    for (y = 0; y < height; ++y)
+    {
+        for (x = 0; x < spanBytes; ++x)
+        {
+            Uint8 maskByte;
+            Uint8 imgByte;
+            int i;
+
+            i = y * masked->pitch + x * 8;
+
+            maskByte = mask[y * spanBytes + x];
+            imgByte = img[y * spanBytes + x];
+
+            bitmapPixels[i + 0] =
+                maskByte & (0x80 >> 0)
+                    ? imgByte & (0x80 >> 0) ? COLOR_WHITE : color
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 1] =
+                maskByte & (0x80 >> 1)
+                    ? imgByte & (0x80 >> 1) ? COLOR_WHITE : color
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 2] =
+                maskByte & (0x80 >> 2)
+                    ? imgByte & (0x80 >> 2) ? COLOR_WHITE : color
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 3] =
+                maskByte & (0x80 >> 3)
+                    ? imgByte & (0x80 >> 3) ? COLOR_WHITE : color
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 4] =
+                maskByte & (0x80 >> 4)
+                    ? imgByte & (0x80 >> 4) ? COLOR_WHITE : color
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 5] =
+                maskByte & (0x80 >> 5)
+                    ? imgByte & (0x80 >> 5) ? COLOR_WHITE : color
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 6] =
+                maskByte & (0x80 >> 6)
+                    ? imgByte & (0x80 >> 6) ? COLOR_WHITE : color
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 7] =
+                maskByte & (0x80 >> 7)
+                    ? imgByte & (0x80 >> 7) ? COLOR_WHITE : color
+                    : COLOR_TRANSPARENT;
+        }
+    }
+    SDL_UnlockSurface(masked);
+
+    SDL_BlitSurface(masked, &srcRect, surface, &dstRect);
+
+    return 0;
+}
+
+int DrawColorBitmap(const struct Rect *dst, int span, const unsigned char *img,
+                    const unsigned char *mask)
+{
+    SDL_Surface *masked;
+    int x;
+    int y;
+    int width;
+    int height;
+    int spanBytes;
+    SDL_Rect srcRect;
+    SDL_Rect dstRect;
+    Uint8 *bitmapPixels;
+
+    spanBytes = (span + 7) / 8; /* Convert to bytes */
+
+    width = dst->right - dst->left + 1;
+    height = dst->bottom - dst->top + 1;
+
+    srcRect.x = 0;
+    srcRect.y = 0;
+    srcRect.w = width;
+    srcRect.h = height;
+
+    dstRect.x = dst->left;
+    dstRect.y = dst->top;
+    dstRect.w = width;
+    dstRect.h = height;
+
+    masked = SDL_CreateRGBSurfaceWithFormat(0, span, height, 8,
+                                            SDL_PIXELFORMAT_INDEX8);
+    if (!masked)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+    SDL_SetPaletteColors(masked->format->palette, mac_pal, 0,
+                         ARRAY_SIZE(mac_pal));
+    SDL_SetColorKey(masked, SDL_TRUE, COLOR_TRANSPARENT);
+
+    /* Color Blit */
+    SDL_LockSurface(masked);
+    bitmapPixels = masked->pixels;
+    for (y = 0; y < height; ++y)
+    {
+        for (x = 0; x < spanBytes; ++x)
+        {
+            Uint8 maskByte;
+            Uint8 imgBytes[4];
+            Uint8 color[16];
+            int i;
+
+            i = y * masked->pitch + x*8;
+
+            maskByte = mask[y * spanBytes + x];
+
+            imgBytes[0] = img[0 * spanBytes * height + y * spanBytes + x];
+            imgBytes[1] = img[1 * spanBytes * height + y * spanBytes + x];
+            imgBytes[2] = img[2 * spanBytes * height + y * spanBytes + x];
+            imgBytes[3] = img[3 * spanBytes * height + y * spanBytes + x];
+
+            color[0] = (((imgBytes[0] & 0x80) >> 7)) << 0 |
+                       (((imgBytes[1] & 0x80) >> 7)) << 1 |
+                       (((imgBytes[2] & 0x80) >> 7)) << 2 |
+                       (((imgBytes[3] & 0x80) >> 7)) << 3 |
+                       0;
+            color[1] = (((imgBytes[0] & 0x40) >> 6)) << 0 |
+                       (((imgBytes[1] & 0x40) >> 6)) << 1 |
+                       (((imgBytes[2] & 0x40) >> 6)) << 2 |
+                       (((imgBytes[3] & 0x40) >> 6)) << 3 |
+                       0;
+            color[2] = (((imgBytes[0] & 0x20) >> 5)) << 0 |
+                       (((imgBytes[1] & 0x20) >> 5)) << 1 |
+                       (((imgBytes[2] & 0x20) >> 5)) << 2 |
+                       (((imgBytes[3] & 0x20) >> 5)) << 3 |
+                       0;
+            color[3] = (((imgBytes[0] & 0x10) >> 4)) << 0 |
+                       (((imgBytes[1] & 0x10) >> 4)) << 1 |
+                       (((imgBytes[2] & 0x10) >> 4)) << 2 |
+                       (((imgBytes[3] & 0x10) >> 4)) << 3 |
+                       0;
+            color[4] = (((imgBytes[0] & 0x08) >> 3)) << 0 |
+                       (((imgBytes[1] & 0x08) >> 3)) << 1 |
+                       (((imgBytes[2] & 0x08) >> 3)) << 2 |
+                       (((imgBytes[3] & 0x08) >> 3)) << 3 |
+                       0;
+            color[5] = (((imgBytes[0] & 0x04) >> 2)) << 0 |
+                       (((imgBytes[1] & 0x04) >> 2)) << 1 |
+                       (((imgBytes[2] & 0x04) >> 2)) << 2 |
+                       (((imgBytes[3] & 0x04) >> 2)) << 3 |
+                       0;
+            color[6] = (((imgBytes[0] & 0x02) >> 1)) << 0 |
+                       (((imgBytes[1] & 0x02) >> 1)) << 1 |
+                       (((imgBytes[2] & 0x02) >> 1)) << 2 |
+                       (((imgBytes[3] & 0x02) >> 1)) << 3 |
+                       0;
+            color[7] = (((imgBytes[0] & 0x01) >> 0)) << 0 |
+                       (((imgBytes[1] & 0x01) >> 0)) << 1 |
+                       (((imgBytes[2] & 0x01) >> 0)) << 2 |
+                       (((imgBytes[3] & 0x01) >> 0)) << 3 |
+                       0;
+
+            bitmapPixels[i + 0] =
+                maskByte & (0x80 >> 0)
+                    ? color[0]
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 1] =
+                maskByte & (0x80 >> 1)
+                    ? color[1]
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 2] =
+                maskByte & (0x80 >> 2)
+                    ? color[2]
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 3] =
+                maskByte & (0x80 >> 3)
+                    ? color[3]
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 4] =
+                maskByte & (0x80 >> 4)
+                    ? color[4]
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 5] =
+                maskByte & (0x80 >> 5)
+                    ? color[5]
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 6] =
+                maskByte & (0x80 >> 6)
+                    ? color[6]
+                    : COLOR_TRANSPARENT;
+            bitmapPixels[i + 7] =
+                maskByte & (0x80 >> 7)
+                    ? color[7]
+                    : COLOR_TRANSPARENT;
+        }
+    }
+    SDL_UnlockSurface(masked);
+
+    SDL_BlitSurface(masked, &srcRect, surface, &dstRect);
+
+    return 0;
+}
