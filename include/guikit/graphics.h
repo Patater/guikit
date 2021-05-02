@@ -63,6 +63,8 @@ void ShowGraphics(void);
 
 void SetColor(int color);
 
+int SaveScreenShot(const char *path);
+
 void FillScreen(int color);
 
 void DrawRect(int color, const struct Rect *rect);

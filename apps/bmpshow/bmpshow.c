@@ -114,6 +114,9 @@ int main(int argc, const char *argv[])
     {
         RandomBitmaps(10000, span, img, mask, imgRect.right, imgRect.bottom);
     }
+
+    SaveScreenShot("bmpshow.bmp");
+
     FreeGraphics();
 
     printf("Goodbye.\n");

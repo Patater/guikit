@@ -50,6 +50,7 @@ int main()
 
     printf("Drawing 10000 rectangles...\n");
     RandomRects(10000);
+    SaveScreenShot("rect.bmp");
     FreeGraphics();
 
     printf("Goodbye.\n");

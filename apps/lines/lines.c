@@ -71,6 +71,7 @@ int main()
 
     printf("Drawing loads of lines...\n");
     TestDrawLines();
+    SaveScreenShot("lines.bmp");
     FreeGraphics();
 
     printf("Goodbye.\n");
