@@ -125,6 +125,19 @@ void ShowGraphics(void)
     SDL_UpdateWindowSurface(window);
 }
 
+int SaveScreenShot(const char *path)
+{
+    int ret;
+
+    ret = SDL_SaveBMP(surface, path);
+    if (ret)
+    {
+        printf("SDL_SaveBMP failed: %s\n", SDL_GetError());
+    }
+
+    return ret;
+}
+
 void SetColor(int color)
 {
     setColor = color;

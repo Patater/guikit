@@ -29,6 +29,7 @@ int main()
         FillScreen(COLOR_BLACK);
         ShowGraphics();
     }
+    SaveScreenShot("fill.bmp");
     FreeGraphics();
 
     return 0;

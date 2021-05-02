@@ -55,6 +55,7 @@ int main()
 
     printf("Drawing 10000 round rects...\n");
     RandomRoundRects(10000);
+    SaveScreenShot("roundrct.bmp");
     FreeGraphics();
 
     printf("Goodbye.\n");

@@ -1496,3 +1496,9 @@ int DrawColorBitmap(const struct Rect *dst, int span, const unsigned char *img,
 
     return 0;
 }
+
+int SaveScreenShot(const char *path)
+{
+    (void)path;
+    return 0;
+}

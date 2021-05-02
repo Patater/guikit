@@ -55,6 +55,7 @@ int main()
 
     printf("Drawing 10000 circles...\n");
     RandomCircles(10000);
+    SaveScreenShot("circles.bmp");
     FreeGraphics();
 
     printf("Goodbye.\n");
