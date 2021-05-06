@@ -83,7 +83,8 @@ u32 xorshift128(u32 *x)
     x[2] = x[3];
 
     tmpx ^= tmpx << a;
-    tmpx ^= tmpx >> b;
+    tmpx ^= tmpx >> b; /* Should this go left or right? Doesn't seem to change the
+    distribution that much either way... */
     x[3] ^= x[3] >> c;
     x[3] ^= tmpx;
 
@@ -110,6 +111,14 @@ i32 RandRange(i32 smallest, i32 biggest)
      * */
     static const i32 max_rand = 0x7FFFFFFFUL;
     i32 ri;
+
+    if (smallest == biggest)
+    {
+        /* This check prevents integer overflow when we attempt to add 1 to
+         * max_rand (after dividing it by 1) in the return statement.  */
+        return smallest;
+    }
+
     ri = prandom() >> 1;
     return ri / (max_rand / (biggest - smallest + 1) + 1) + smallest;
 }

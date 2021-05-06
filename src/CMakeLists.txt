@@ -6,6 +6,7 @@ add_library(guikit
     bmp.c
     hash.c
     hashmap.c
+    histgram.c
     intern.c
     panic.c
     pmemory.c
