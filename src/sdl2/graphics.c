@@ -138,6 +138,11 @@ void ShowGraphics(void)
 {
     int ret;
 
+    /* Seems needed on mac for some reason, otherwise window doesn't show up...
+     * */
+    SDL_Event event;
+    SDL_PollEvent(&event);
+
     ret = SDL_BlitSurface(surface, NULL, screen, NULL);
     if (ret < 0)
     {
