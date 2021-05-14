@@ -23,10 +23,10 @@ int main()
 
     printf("Hello world\n");
 
-    /* Display a black screen for about 2 seconds. */
+    /* Display a blue screen for about 2 seconds. */
     for(i = 0; i < 60 * 2; ++i)
     {
-        FillScreen(COLOR_BLACK);
+        FillScreen(COLOR_BLUE);
         ShowGraphics();
     }
     SaveScreenShot("fill.bmp");
