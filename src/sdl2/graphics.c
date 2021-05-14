@@ -104,9 +104,23 @@ int InitGraphics(void)
     pitch = surface->pitch;
 
     /* Update the screen with the new surface. */
-    SDL_FillRect(surface, NULL, surfaceColor(COLOR_WHITE));
-    SDL_BlitSurface(surface, NULL, screen, NULL);
-    SDL_UpdateWindowSurface(window);
+    ret = SDL_FillRect(surface, NULL, surfaceColor(COLOR_WHITE));
+    if (ret < 0)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+
+    ret = SDL_BlitSurface(surface, NULL, screen, NULL);
+    if (ret < 0)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+
+    ret = SDL_UpdateWindowSurface(window);
+    if (ret < 0)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
 
     return 0;
 }
@@ -121,8 +135,19 @@ void FreeGraphics(void)
 
 void ShowGraphics(void)
 {
-    SDL_BlitSurface(surface, NULL, screen, NULL);
-    SDL_UpdateWindowSurface(window);
+    int ret;
+
+    ret = SDL_BlitSurface(surface, NULL, screen, NULL);
+    if (ret < 0)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+
+    ret = SDL_UpdateWindowSurface(window);
+    if (ret < 0)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
 }
 
 int SaveScreenShot(const char *path)
