@@ -1,6 +1,7 @@
 add_subdirectory(bmpshow)
 add_subdirectory(circles)
 add_subdirectory(fill)
+add_subdirectory(fonts)
 add_subdirectory(histgram)
 add_subdirectory(lines)
 add_subdirectory(rect)
