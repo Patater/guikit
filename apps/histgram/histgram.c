@@ -101,7 +101,7 @@ void RandomHistograms(int num)
         FillScreen(COLOR_WHITE);
         /*FillRect(COLOR_WHITE, &rect);*/
         drawAxes(&rect);
-        DrawHistogram(h, &rect);
+        DrawHistogram(h, color, &rect);
 
         HistogramFree(h);
 
@@ -146,7 +146,7 @@ void RandomHistogram(int samples)
     /* XXX Looks height is not obeyed... Should we clip? or let histogram
      * outgrow its rect? Let it be ugly if the client asks for it? */
     drawAxes(&rect);
-    DrawHistogram(h, &rect);
+    DrawHistogram(h, COLOR_RED, &rect);
 
     HistogramFree(h);
 
@@ -209,7 +209,7 @@ void SampledHistogram(int samples)
     FillScreen(COLOR_WHITE);
     /*FillRect(COLOR_WHITE, &rect);*/
     drawAxes(&rect);
-    DrawHistogram(n, &rect);
+    DrawHistogram(n, COLOR_RED, &rect);
 
     HistogramFree(u);
     HistogramFree(n);

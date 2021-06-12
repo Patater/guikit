@@ -25,6 +25,7 @@ int HistogramGetMinSize(const struct Histogram *h);
 void HistogramPush(struct Histogram *h, int value);
 int HistogramGet(const struct Histogram *h, size_t which);
 
-void DrawHistogram(const struct Histogram *h, const struct Rect *rect);
+void DrawHistogram(const struct Histogram *h, int color,
+                   const struct Rect *rect);
 
 #endif

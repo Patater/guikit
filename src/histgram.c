@@ -136,8 +136,8 @@ int HistogramGet(const struct Histogram *h, size_t which)
     return h->buckets[which];
 }
 
-static void drawBucket(int bval, int bwidth, int maxSize, int x, int y,
-                       int height)
+static void drawBucket(int bval, int bwidth, int maxSize, int color, int x,
+                       int y, int height)
 {
     struct Rect bar;
     int bheight;
@@ -161,11 +161,11 @@ static void drawBucket(int bval, int bwidth, int maxSize, int x, int y,
            bar.top);
 #endif
 
-    FillRect(COLOR_RED, &bar);
+    FillRect(color, &bar);
 }
 
-static void drawBuckets(const struct Histogram *h, const struct Rect *rect,
-                        int width, int height)
+static void drawBuckets(const struct Histogram *h, int color,
+                        const struct Rect *rect, int width, int height)
 {
     size_t i;
     int x;
@@ -192,12 +192,13 @@ static void drawBuckets(const struct Histogram *h, const struct Rect *rect,
         {
             panic("Too big bucket. Max func broken\n");
         }
-        drawBucket(h->buckets[i], bwidth, maxSize, x, y, height);
+        drawBucket(h->buckets[i], bwidth, maxSize, color, x, y, height);
         x += bwidth;
     }
 }
 
-void DrawHistogram(const struct Histogram *h, const struct Rect *rect)
+void DrawHistogram(const struct Histogram *h, int color,
+                   const struct Rect *rect)
 {
     int width;
     int height;
@@ -205,5 +206,5 @@ void DrawHistogram(const struct Histogram *h, const struct Rect *rect)
     width = rect->right - rect->left + 1;
     height = rect->bottom - rect->top + 1;
 
-    drawBuckets(h, rect, width, height);
+    drawBuckets(h, color, rect, width, height);
 }
