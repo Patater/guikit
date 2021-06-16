@@ -5,6 +5,7 @@ function(enable_warnings target)
             set(GUIKIT_CFLAGS
                 -Wall
                 -Werror
+                -Werror=vla
                 -Wextra
                 -std=c89
                 -pedantic
