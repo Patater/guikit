@@ -27,7 +27,7 @@ if(GRAPHICS STREQUAL "SDL2")
     target_sources(guikit PRIVATE
         sdl2/graphics.c
     )
-    target_include_directories(guikit PRIVATE
+    target_include_directories(guikit SYSTEM PRIVATE
         ${SDL2_INCLUDE_DIRS}
     )
 else()
