@@ -1,0 +1,48 @@
+name: CMake Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@master
+
+      - name: Install build environment
+        run: |
+            sudo apt-get update
+            sudo apt-get install cmake lcov libsdl2-dev ninja-build
+            echo -n "CC: "; cc --version
+            echo -n "CMake: "; cmake --version
+            echo -n "lcov: "; lcov --version
+            echo -n "ninja: "; ninja --version
+            echo -n "sdl2: "; sdl2-config --version
+
+      - name: Build and test
+        run: |
+            ctest --build-and-test . build --build-generator Ninja \
+              --build-options \
+                -DENABLE_COVERAGE=1 \
+                -DENABLE_WARNINGS=1 \
+                -DCMAKE_BUILD_TYPE=Debug \
+              --test-command ctest --rerun-failed --output-on-failure
+
+      - name: Generate coverage
+        run: |
+            lcov --directory . --base-directory build --capture -o build/cov.info
+            lcov --remove build/cov.info -o build/cov_nosys.info '/usr/include/*'
+            lcov --list build/cov_nosys.info
+            genhtml build/cov_nosys.info -o build/lcov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          flags: unittests
+          files: build/cov_nosys.info
+          name: codecov-umbrella # optional
+          fail_ci_if_error: true
+          verbose: true
