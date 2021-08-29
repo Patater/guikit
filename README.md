@@ -43,6 +43,7 @@ The Patater GUI Kit includes a number of demo applications (see
 ### Other fun things inside
 
 - 128-bit xorshift pseudo random number generator
+- 64-bit FNV-1a hash
 - 32-bit FNV-1a hash
 - Hashmap
 - `snprintf()` for C89 toolchains
