@@ -54,3 +54,8 @@ The Patater GUI Kit is tested on the following platforms:
 
 - FreeBSD
 - FreeDOS with DJGPP
+
+## Licensing
+
+- The Patater GUI Kit Source Code is licensed as AGPL-3.0-or-later
+- The Patater GUI Kit Icons are licensed as CC BY-SA 4.0
