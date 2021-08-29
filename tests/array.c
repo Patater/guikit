@@ -37,6 +37,8 @@ static int test_grow_1(void)
     TEST_EQ(array_len(a), 0);
     TEST_GT(array_cap(a), 0);
 
+    array_free(a);
+
     return 0;
 }
 
@@ -50,6 +52,8 @@ static int test_push_1(void)
     TEST_EQ(a[0], val);
     TEST_EQ(array_len(a), 1);
     TEST_GT(array_cap(a), 0);
+
+    array_free(a);
 
     return 0;
 }
@@ -67,6 +71,8 @@ static int test_pop_1(void)
     TEST_EQ(array_len(a), 0);
     TEST_GT(array_cap(a), 0);
 
+    array_free(a);
+
     return 0;
 }
 
@@ -79,6 +85,8 @@ static int test_grow_2(void)
     TEST_NEP(a, NULL);
     TEST_EQ(array_len(a), 0);
     TEST_GE(array_cap(a), 2);
+
+    array_free(a);
 
     return 0;
 }
@@ -95,6 +103,8 @@ static int test_push_2(void)
     TEST_EQ(a[1], val[1]);
     TEST_EQ(array_len(a), 2);
     TEST_GE(array_cap(a), 2);
+
+    array_free(a);
 
     return 0;
 }
@@ -117,6 +127,8 @@ static int test_pop_2(void)
     TEST_EQ(array_len(a), 0);
     TEST_GT(array_cap(a), 0);
 
+    array_free(a);
+
     return 0;
 }
 
@@ -135,6 +147,8 @@ static int test_amortized_constant_growth(void)
 
     TEST_EQ(array_len(a), 3);
     TEST_EQ(array_cap(a), 4);
+
+    array_free(a);
 
     return 0;
 }
