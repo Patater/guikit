@@ -10,25 +10,22 @@
 
 /* FNV-1a algorithm description from
  * http://www.isthe.com/chongo/tech/comp/fnv/index.html#FNV-param */
-static unsigned long hash_fnv1a(const char *buf, size_t len)
+static u32 hash_fnv1a(const char *buf, size_t len)
 {
     /* FNV-1a parameters for a 32-bit hash */
-    const unsigned long PRIME_32 = 16777619UL;
-    const unsigned long OFFSET_32 = 2166136261UL;
+    const u32 PRIME_32 = 16777619UL;
+    const u32 OFFSET_32 = 2166136261UL;
 
-    unsigned long h = OFFSET_32;
+    u32 h = OFFSET_32;
     size_t i;
 
     /* Note: could be faster if we do machine-word-sized chunks. */
     for (i = 0; i < len; i++)
     {
-        h ^= ((unsigned char)buf[i]) & 0xFFUL;
+        h ^= ((u8)buf[i]) & 0xFFUL;
         h *= PRIME_32;
     }
 
-    /* Restrict to 32-bit output. Not needed on 32-bit machines (or if we used
-     * 32-bit uints). */
-    h &= 0xFFFFFFFFUL;
     return h;
 }
 
