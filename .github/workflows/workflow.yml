@@ -28,6 +28,7 @@ jobs:
         run: |
             ctest --build-and-test . build --build-generator Ninja \
               --build-options \
+                -DENABLE_SANITIZERS=1 \
                 -DENABLE_COVERAGE=1 \
                 -DENABLE_WARNINGS=1 \
                 -DCMAKE_BUILD_TYPE=Debug \
