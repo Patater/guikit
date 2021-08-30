@@ -7,6 +7,7 @@
  */
 
 #include "guikit/intern.h"
+#include "guikit/array.h"
 #include "guikit/hashmap.h"
 #include "guikit/pmemory.h"
 #include <stdio.h>
@@ -14,15 +15,24 @@
 
 static struct hashmap *intern_map = NULL;
 static int num_hits = 0;
-static int num_interned = 0;
+static char **intern_array;
 
 void intern_free(void)
 {
+    size_t len;
+    size_t i;
+
     hashmap_free(intern_map);
     intern_map = NULL;
 
+    len = array_len(intern_array);
+    for (i = 0; i < len; i++)
+    {
+        pfree(intern_array[i]);
+    }
+    array_free(intern_array);
+
     num_hits = 0;
-    num_interned = 0;
 }
 
 const char *intern(const char *s)
@@ -47,18 +57,23 @@ const char *intern(const char *s)
     }
 
     /* Didn't find previous copy, so add it to the intern map. */
-    /* TODO who will own memory for the interned strings? Will we ever free
-     * them? If we don't own the memory, what if the added string goes out of
-     * scope? Determine if we want the interner to own the memory and make
-     * copies of strings added to it. */
-    /* Yes, we want the interner to own the memory. This is known as "copy
-     * semantics" or "<something> containers"?. */
-    /* If the strings are static, we shouldn't have to pay the price for a
-     * copy, though. TODO add a function to not copy-intern and let the caller
-     * decide what to do. */
+    /* Note that we own the memory for the string we are interning. We do this
+     * so that one can intern strings they've made up on the fly (temporary
+     * strings) without the intern storage disappearing out from under us.
+     *
+     * We track pointers to allocated memory in the intern array. This allows
+     * us to free all the memory we've allocated without using the hash map.
+     *
+     * We don't provide a way to avoid string copying at the moment, although
+     * this would be straightforward to implement given we are tracking
+     * allocated memory. If we did not have a separate intern_array, we would
+     * find it very hard to track such things as the pointers in the hash map's
+     * values array may or may not be strings we've allocated. TODO add a
+     * function to not copy-intern to enable callers to make more efficient use
+     * of string storage. */
     copy = pmalloc(len + 1);
     strcpy(copy, s);
-    num_interned += 1;
+    array_push(intern_array, copy); /* Track allocated memory */
     hashmap_set(intern_map, copy, len, (ptrdiff_t)copy);
     interned = copy;
 
@@ -72,5 +87,5 @@ int intern_num_hits(void)
 
 int intern_num_interned(void)
 {
-    return num_interned;
+    return array_len(intern_array);
 }
