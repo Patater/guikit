@@ -538,7 +538,7 @@ const struct Font *GetFont(const char *name)
 void FreeFont(struct Font *font)
 {
     /* Remove the font from the font map. */
-    hashmap_remove(map, font->name, font->nameLen);
+    hashmap_del(map, font->name, font->nameLen);
 
     /* Free the font's memory */
     if (font)

@@ -174,8 +174,8 @@ void hashmap_put(struct hashmap *hashmap,
     return;
 }
 
-void hashmap_remove(struct hashmap *hashmap,
-                    const char *key, size_t key_len)
+void hashmap_del(struct hashmap *hashmap,
+                 const char *key, size_t key_len)
 {
     u32 h[2];
     size_t i;
