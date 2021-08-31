@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const size_t MIN_CAPACITY = 128;
+static const size_t MIN_CAPACITY = 8;
 
 struct hashmap
 {
