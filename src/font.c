@@ -529,7 +529,7 @@ const struct Font *GetFont(const char *name)
     if (font)
     {
         /* If the font could be loaded, store in our hashmap for later. */
-        hashmap_set(map, font->name, font->nameLen, (ptrdiff_t)font);
+        hashmap_put(map, font->name, font->nameLen, (ptrdiff_t)font);
     }
 
     return font;

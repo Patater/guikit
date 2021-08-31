@@ -113,7 +113,7 @@ ptrdiff_t hashmap_get(const struct hashmap *hashmap,
     return 0;
 }
 
-void hashmap_set(struct hashmap *hashmap,
+void hashmap_put(struct hashmap *hashmap,
                  const char *key, size_t key_len, ptrdiff_t value)
 {
     u32 h[2];

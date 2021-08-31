@@ -75,7 +75,7 @@ const char *intern(const char *s)
     copy = pmalloc(len + 1);
     strcpy(copy, s);
     array_push(intern_array, copy); /* Track allocated memory */
-    hashmap_set(intern_map, copy, len, (ptrdiff_t)copy);
+    hashmap_put(intern_map, copy, len, (ptrdiff_t)copy);
     interned = copy;
 
     return interned;
