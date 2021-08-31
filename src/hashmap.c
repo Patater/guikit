@@ -16,217 +16,233 @@ struct hashmap
     size_t length;
     size_t num_collisions;
     size_t capacity;
-    struct hashmap_node *bucket;
+    u32 (*keys)[2];
+    ptrdiff_t *values;
 };
 
-struct hashmap_node
-{
-    u32 hash[2];
-    ptrdiff_t value;
-    struct hashmap_node *next;
-};
-
-/* TODO: automatically grow the hashmap if the number of collisions exceeds
- * some threshold. Maybe if length exceeds about half the capacity of the
- * hashmap? */
-/*static void hashmap_grow();*/
-
-struct hashmap *hashmap_alloc(void)
+struct hashmap *hashmap_alloc_cap(size_t capacity)
 {
     struct hashmap *hashmap;
 
     hashmap = pmalloc(sizeof(*hashmap));
     hashmap->length = 0;
     hashmap->num_collisions = 0;
-    hashmap->capacity = MIN_CAPACITY;
-    hashmap->bucket = pcalloc(hashmap->capacity, sizeof(*hashmap->bucket));
+    hashmap->capacity = capacity;
+    hashmap->keys = pcalloc(hashmap->capacity, sizeof(*hashmap->keys));
+    hashmap->values = pcalloc(hashmap->capacity, sizeof(*hashmap->values));
 
     return hashmap;
+}
+
+struct hashmap *hashmap_alloc(void)
+{
+    return hashmap_alloc_cap(MIN_CAPACITY);
+}
+
+static void hashmap_grow(struct hashmap *hashmap, size_t capacity)
+{
+    size_t i;
+    u32 (*old_keys)[2];
+    ptrdiff_t *old_values;
+    size_t old_capacity;
+
+    old_capacity = hashmap->capacity;
+    old_keys = hashmap->keys;
+    old_values = hashmap->values;
+
+    /* Allocate memory for the new keys and values. */
+    hashmap->length = 0;
+    hashmap->capacity = capacity;
+    hashmap->keys = pcalloc(hashmap->capacity, sizeof(*hashmap->keys));
+    hashmap->values = pcalloc(hashmap->capacity, sizeof(*hashmap->values));
+
+    for (i = 0; i < old_capacity; ++i)
+    {
+        /* Add each previously occupied slot to the new map. */
+        if (old_keys[i][0] != 0 ||
+            old_keys[i][1] != 0)
+        {
+            hashmap_put(hashmap, old_keys[i], old_values[i]);
+        }
+    }
+
+    /* Free the old hashmap memory. */
+    pfree(old_keys);
+    pfree(old_values);
 }
 
 void hashmap_free(struct hashmap *hashmap)
 {
     if (hashmap)
     {
-        size_t i;
-
-        for (i = 0; i < hashmap->capacity; i++)
-        {
-            struct hashmap_node *n = &hashmap->bucket[i];
-            /* Free linked list of nodes. */
-            n = n->next;
-            while (n)
-            {
-                struct hashmap_node *next = n->next;
-                pfree(n);
-                n = next;
-            }
-        }
-        pfree(hashmap->bucket);
+        pfree(hashmap->keys);
+        pfree(hashmap->values);
     }
     pfree(hashmap);
-}
-
-static size_t hash_to_index(const u32 hash[], size_t capacity)
-{
-    return hash[0] % capacity;
 }
 
 ptrdiff_t hashmap_get(const struct hashmap *hashmap, const u32 hash[])
 {
     size_t i;
-    struct hashmap_node *n;
 
-    i = hash_to_index(hash, hashmap->capacity);
-
-    n = &hashmap->bucket[i];
-    if (n->hash[0] == 0 && n->hash[1] == 0)
+    if (hashmap->length == 0)
     {
-        /* Nothing here */
-        /* XXX Shall we return something for not available other than 0? */
+        /* Nothing inside. */
         return 0;
     }
 
-    /* Search linearly through the linked list of hashmap nodes for the
-     * exact hash. */
-    while (n)
-    {
-        struct hashmap_node *next = n->next;
-        if (n->hash[0] == hash[0] && n->hash[1] == hash[1])
-        {
-            /* Found matching hash. */
-            return n->value;
-        }
+    /* We are ignoring the upper 32-bits of hash for indexing purposes, as
+     * they'd get masked off anyway when converting the hash to an index. */
+    i = hash[0];
 
-        /* Didn't find a matching hash. Look at the next node. */
-        n = next;
+    for (;;)
+    {
+        /* Convert hash or out-of-bounds index to a valid index. */
+        i &= hashmap->capacity - 1;
+
+        if (hashmap->keys[i][0] == hash[0] &&
+            hashmap->keys[i][1] == hash[1])
+        {
+            /* Found the key! */
+            return hashmap->values[i];
+        }
+        else if (hashmap->keys[i][0] == 0 &&
+                 hashmap->keys[i][1] == 0)
+        {
+            /* Found first empty slot. We can stop searching. */
+            break;
+        }
+        /* Try the next slot. */
+        ++i;
     }
 
-    /* We've exhausted the bucket but didn't find the hash. */
+    /* We've ended our scan and didn't find the key. */
     return 0;
 }
 
 void hashmap_put(struct hashmap *hashmap, const u32 hash[], ptrdiff_t value)
 {
     size_t i;
-    struct hashmap_node *n;
+    size_t initial_i;
 
-    i = hash_to_index(hash, hashmap->capacity);
-
-    n = &hashmap->bucket[i];
-    if (n->hash[0] == 0 && n->hash[1] == 0)
+    if (hashmap->length >= hashmap->capacity / 2)
     {
-        /* Fresh bucket. Add first entry to bucket. */
-        hashmap->length += 1;
-        n->hash[0] = hash[0];
-        n->hash[1] = hash[1];
-        n->value = value;
-        n->next = NULL;
-
-        return;
+        /* Double the size of the map. Keep it to a power of 2 in size, so that
+         * we can efficiently convert from a hash to an index with a mask
+         * (bitwise anding with one less than the capacity). */
+        /* Note that growing here will avoid infinite loops in hashmap_get() as
+         * we'll always be guaranteed a bunch of empty space in the map. */
+        hashmap_grow(hashmap, 2 * hashmap->capacity);
     }
 
-    /* Search linearly through the linked list of hashmap nodes for the
-     * exact hash. */
+    i = hash[0];
+    initial_i = i & (hashmap->capacity - 1);
+
     for (;;)
     {
-        struct hashmap_node *next = n->next;
-        if (n->hash[0] == hash[0] && n->hash[1] == hash[1])
-        {
-            /* Found matching hash */
-            n->value = value;
-            return;
-        }
+        /* Convert hash or out-of-bounds index to a valid index. */
+        i &= hashmap->capacity - 1;
 
-        /* End of list; didn't find hash */
-        if (n->next == NULL)
+        if (hashmap->keys[i][0] == 0 && hashmap->keys[i][1] == 0)
         {
             break;
         }
-
-        n = next;
+        else if (hashmap->keys[i][0] == hash[0]
+                 && hashmap->keys[i][1] == hash[1])
+        {
+            /* Found an existing index with same hash. As we use a decent
+             * 64-bit hash, this is very likely to be the key we are looking
+             * for. So, go ahead and update the value. */
+            hashmap->values[i] = value;
+            return;
+        }
+        /* Try the next slot. Take a note that we had to go to the next slot as
+         * we encountered another value with similar hash (enough to want to go
+         * into the same index). */
+        ++i;
     }
 
-    /* Went through entire bucket and didn't find entry. */
-    /* Append to end of bucket. */
-    hashmap->num_collisions += 1;
-    hashmap->length += 1;
-    n->next = pmalloc(sizeof(*n->next));
-    n->next->hash[0] = hash[0];
-    n->next->hash[1] = hash[1];
-    n->next->value = value;
-    n->next->next = NULL;
-
-    return;
+    /* Found an empty slot. We can stop looking for one. Go ahead and
+     * set the key and value. */
+    hashmap->keys[i][0] =  hash[0];
+    hashmap->keys[i][1] =  hash[1];
+    hashmap->values[i] = value;
+    ++hashmap->length;
+    if (i != initial_i)
+    {
+        ++hashmap->num_collisions;
+    }
 }
 
 void hashmap_del(struct hashmap *hashmap, const u32 hash[])
 {
     size_t i;
-    struct hashmap_node *n;
-    struct hashmap_node *prev;
 
-    i = hash_to_index(hash, hashmap->capacity);
+    i = hash[0];
 
-    n = &hashmap->bucket[i];
-    if (n->hash[0] == 0 && n->hash[1] == 0)
-    {
-        /* Fresh, empty bucket. Nothing to do. */
-        return;
-    }
-
-    /* Search linearly through the linked list of hashmap nodes for the
-     * exact hash. */
-    prev = NULL;
     for (;;)
     {
-        struct hashmap_node *next = n->next;
-        if (n->hash[0] == hash[0] && n->hash[1] == hash[1])
+        /* Convert hash or out-of-bounds index to a valid index. */
+        i &= hashmap->capacity - 1;
+
+        if (hashmap->keys[i][0] == 0 && hashmap->keys[i][1] == 0)
         {
-            /* Found matching hash. */
-            hashmap->length -= 1;
-            if (prev)
-            {
-                prev->next = n->next;
-                pfree(n);
-            }
-            else
-            {
-                /* The first entry in bucket is to be removed. */
-                if (n->next)
-                {
-                    /* Copy the next node in and free the next node. TODO Make
-                     * the bucket list a list of pointers, rather than an array
-                     * of heads of linked lists. Then we can avoid this copy
-                     * and just update the node pointers. */
-                    *n = *n->next;
-                    pfree(n->next);
-                }
-                else
-                {
-                    /* There is only one node in the bucket. */
-                    n->hash[0] = 0;
-                    n->hash[1] = 0;
-                    n->value = 0;
-                    n->next = NULL;
-                }
-            }
+            /* Key not present, so nothing to do. */
             return;
         }
-
-        /* End of list; didn't find hash */
-        if (n->next == NULL)
+        else if (hashmap->keys[i][0] == hash[0]
+                 && hashmap->keys[i][1] == hash[1])
         {
+            /* Found an existing index with same hash. As we use a decent
+             * 64-bit hash, this is very likely to be the key we are looking
+             * for. */
+             break;
+        }
+        /* Try the next slot. */
+        ++i;
+    }
+
+    hashmap->keys[i][0] = 0;
+    hashmap->keys[i][1] = 0;
+    --hashmap->length;
+
+    /* Re-add all subsequent occupied keys in the same probe range, as leaving
+     * a gap where we removed the key will cause these subsequent entries to
+     * never be found (as probing stops at first 0 hash and we just make the
+     * removed entry have a zero hash). */
+    ++i;
+    for (;;)
+    {
+        u32 key[2];
+        ptrdiff_t value;
+
+        /* Convert hash or out-of-bounds index to a valid index. */
+        i &= hashmap->capacity - 1;
+
+        if (hashmap->keys[i][0] == 0 && hashmap->keys[i][1] == 0)
+        {
+            /* End of the probe range. We are done. */
             break;
         }
 
-        /* Didn't find a matching hash. Look at the next node. */
-        prev = n;
-        n = next;
+        key[0] = hashmap->keys[i][0];
+        key[1] = hashmap->keys[i][1];
+        value = hashmap->values[i];
+        hashmap->keys[i][0] = 0;
+        hashmap->keys[i][1] = 0;
+        --hashmap->length;
+        hashmap_put(hashmap, key, value);
+
+        /* Keep going within the probe range. */
+        ++i;
     }
 
-    /* Went through entire bucket and didn't find entry. */
-    return;
+    /* We've now re-added any entries within the same probe range. */
+}
+
+size_t hashmap_capacity(const struct hashmap *hashmap)
+{
+    return hashmap->capacity;
 }
 
 size_t hashmap_length(const struct hashmap *hashmap)

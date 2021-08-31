@@ -18,6 +18,8 @@ struct hashmap;
 struct hashmap *hashmap_alloc(void);
 void hashmap_free(struct hashmap *hashmap);
 
+/* Note that our hashmap can't handle zero as a hash value, as it uses 0 to
+ * know if a value is present or not in the keys array. */
 ptrdiff_t
 hashmap_get(const struct hashmap *hashmap,
             const u32 hash[]);
@@ -27,6 +29,8 @@ void hashmap_put(struct hashmap *hashmap,
 
 void hashmap_del(struct hashmap *hashmap,
                  const u32 hash[]);
+
+size_t hashmap_capacity(const struct hashmap *hashmap);
 
 size_t hashmap_length(const struct hashmap *hashmap);
 
