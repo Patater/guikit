@@ -11,6 +11,7 @@
 #include "guikit/bmp.h"
 #include "guikit/debug.h"
 #include "guikit/graphics.h"
+#include "guikit/hash.h"
 #include "guikit/hashmap.h"
 #include "guikit/intern.h"
 #include "guikit/panic.h"
@@ -507,6 +508,7 @@ const struct Font *GetFont(const char *name)
 {
     size_t len;
     const struct Font *font;
+    u32 key[2];
 
     /* Lazy load the font map. */
     if (!map)
@@ -515,7 +517,8 @@ const struct Font *GetFont(const char *name)
         map = hashmap_alloc();
     }
     len = strlen(name);
-    font = (struct Font *)hashmap_get(map, name, len);
+    hash64(key, name, len);
+    font = (struct Font *)hashmap_get(map, key);
     if (font)
     {
         /*/DebugPrintf("Previously found font\n");*/
@@ -528,7 +531,7 @@ const struct Font *GetFont(const char *name)
     if (font)
     {
         /* If the font could be loaded, store in our hashmap for later. */
-        hashmap_put(map, font->name, font->nameLen, (ptrdiff_t)font);
+        hashmap_put(map, key, (ptrdiff_t)font);
     }
 
     return font;
@@ -536,8 +539,11 @@ const struct Font *GetFont(const char *name)
 
 void FreeFont(struct Font *font)
 {
+    u32 key[2];
+
     /* Remove the font from the font map. */
-    hashmap_del(map, font->name, font->nameLen);
+    hash64(key, font->name, font->nameLen);
+    hashmap_del(map, key);
 
     /* Free the font's memory */
     if (font)

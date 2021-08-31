@@ -9,6 +9,8 @@
 #ifndef HASHMAP_H
 #define HASHMAP_H
 
+#include "guikit/ptypes.h"
+
 #include <stddef.h>
 
 struct hashmap;
@@ -18,13 +20,13 @@ void hashmap_free(struct hashmap *hashmap);
 
 ptrdiff_t
 hashmap_get(const struct hashmap *hashmap,
-            const char *key, size_t key_len);
+            const u32 hash[]);
 
 void hashmap_put(struct hashmap *hashmap,
-                 const char *key, size_t key_len, ptrdiff_t value);
+                 const u32 hash[], ptrdiff_t value);
 
 void hashmap_del(struct hashmap *hashmap,
-                 const char *key, size_t key_len);
+                 const u32 hash[]);
 
 size_t hashmap_length(const struct hashmap *hashmap);
 
