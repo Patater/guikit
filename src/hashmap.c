@@ -9,7 +9,7 @@
 #include "guikit/hashmap.h"
 #include "guikit/pmemory.h"
 
-static const size_t MIN_CAPACITY = 128;
+static const size_t MIN_CAPACITY = 8;
 
 struct hashmap
 {
