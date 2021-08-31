@@ -8,6 +8,7 @@
 
 #include "guikit/intern.h"
 #include "guikit/array.h"
+#include "guikit/hash.h"
 #include "guikit/hashmap.h"
 #include "guikit/pmemory.h"
 #include "guikit/ptypes.h"
@@ -41,6 +42,7 @@ const char *intern(const char *s)
     size_t len;
     const char *interned;
     char *copy;
+    u32 key[2];
 
     /* Lazy load the intern map */
     if (!intern_map)
@@ -49,7 +51,8 @@ const char *intern(const char *s)
     }
 
     len = strlen(s);
-    interned = (const char *)hashmap_get(intern_map, s, len);
+    hash64(key, s, len);
+    interned = (const char *)hashmap_get(intern_map, key);
     if (interned != 0)
     {
         /* Found previous copy */
@@ -75,7 +78,7 @@ const char *intern(const char *s)
     copy = pmalloc(len + 1);
     strcpy(copy, s);
     array_push(intern_array, copy); /* Track allocated memory */
-    hashmap_put(intern_map, copy, len, (ptrdiff_t)copy);
+    hashmap_put(intern_map, key, (ptrdiff_t)copy);
     interned = copy;
 
     return interned;

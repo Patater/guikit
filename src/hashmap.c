@@ -7,9 +7,7 @@
  */
 
 #include "guikit/hashmap.h"
-#include "guikit/hash.h"
 #include "guikit/pmemory.h"
-#include <string.h>
 
 static const size_t MIN_CAPACITY = 128;
 
@@ -23,8 +21,6 @@ struct hashmap
 
 struct hashmap_node
 {
-    size_t key_len;
-    const char *key;
     u32 hash[2];
     ptrdiff_t value;
     struct hashmap_node *next;
@@ -71,23 +67,20 @@ void hashmap_free(struct hashmap *hashmap)
     pfree(hashmap);
 }
 
-static size_t hash_to_index(u32 hash[], size_t capacity)
+static size_t hash_to_index(const u32 hash[], size_t capacity)
 {
     return hash[0] % capacity;
 }
 
-ptrdiff_t hashmap_get(const struct hashmap *hashmap,
-                      const char *key, size_t key_len)
+ptrdiff_t hashmap_get(const struct hashmap *hashmap, const u32 hash[])
 {
-    u32 h[2];
     size_t i;
     struct hashmap_node *n;
 
-    hash64(h, key, key_len);
-    i = hash_to_index(h, hashmap->capacity);
+    i = hash_to_index(hash, hashmap->capacity);
 
     n = &hashmap->bucket[i];
-    if (n->key == NULL)
+    if (n->hash[0] == 0 && n->hash[1] == 0)
     {
         /* Nothing here */
         /* XXX Shall we return something for not available other than 0? */
@@ -95,43 +88,38 @@ ptrdiff_t hashmap_get(const struct hashmap *hashmap,
     }
 
     /* Search linearly through the linked list of hashmap nodes for the
-     * exact key. */
+     * exact hash. */
     while (n)
     {
         struct hashmap_node *next = n->next;
-        if (n->key_len == key_len && memcmp(n->key, key, key_len) == 0)
+        if (n->hash[0] == hash[0] && n->hash[1] == hash[1])
         {
-            /* Found matching key. */
+            /* Found matching hash. */
             return n->value;
         }
 
-        /* Didn't find a matching key. Look at the next node. */
+        /* Didn't find a matching hash. Look at the next node. */
         n = next;
     }
 
-    /* We've exhausted the bucket but didn't find the key. */
+    /* We've exhausted the bucket but didn't find the hash. */
     return 0;
 }
 
-void hashmap_put(struct hashmap *hashmap,
-                 const char *key, size_t key_len, ptrdiff_t value)
+void hashmap_put(struct hashmap *hashmap, const u32 hash[], ptrdiff_t value)
 {
-    u32 h[2];
     size_t i;
     struct hashmap_node *n;
 
-    hash64(h, key, key_len);
-    i = hash_to_index(h, hashmap->capacity);
+    i = hash_to_index(hash, hashmap->capacity);
 
     n = &hashmap->bucket[i];
-    if (n->key == NULL)
+    if (n->hash[0] == 0 && n->hash[1] == 0)
     {
         /* Fresh bucket. Add first entry to bucket. */
         hashmap->length += 1;
-        n->key_len = key_len;
-        n->key = key;
-        n->hash[0] = h[0];
-        n->hash[1] = h[1];
+        n->hash[0] = hash[0];
+        n->hash[1] = hash[1];
         n->value = value;
         n->next = NULL;
 
@@ -139,18 +127,18 @@ void hashmap_put(struct hashmap *hashmap,
     }
 
     /* Search linearly through the linked list of hashmap nodes for the
-     * exact key. */
+     * exact hash. */
     for (;;)
     {
         struct hashmap_node *next = n->next;
-        if (n->key_len == key_len && memcmp(n->key, key, key_len) == 0)
+        if (n->hash[0] == hash[0] && n->hash[1] == hash[1])
         {
-            /* Found matching key */
+            /* Found matching hash */
             n->value = value;
             return;
         }
 
-        /* End of list; didn't find key */
+        /* End of list; didn't find hash */
         if (n->next == NULL)
         {
             break;
@@ -164,43 +152,38 @@ void hashmap_put(struct hashmap *hashmap,
     hashmap->num_collisions += 1;
     hashmap->length += 1;
     n->next = pmalloc(sizeof(*n->next));
-    n->next->key_len = key_len;
-    n->next->key = key;
-    n->next->hash[0] = h[0];
-    n->next->hash[1] = h[1];
+    n->next->hash[0] = hash[0];
+    n->next->hash[1] = hash[1];
     n->next->value = value;
     n->next->next = NULL;
 
     return;
 }
 
-void hashmap_del(struct hashmap *hashmap,
-                 const char *key, size_t key_len)
+void hashmap_del(struct hashmap *hashmap, const u32 hash[])
 {
-    u32 h[2];
     size_t i;
     struct hashmap_node *n;
     struct hashmap_node *prev;
 
-    hash64(h, key, key_len);
-    i = hash_to_index(h, hashmap->capacity);
+    i = hash_to_index(hash, hashmap->capacity);
 
     n = &hashmap->bucket[i];
-    if (n->key == NULL)
+    if (n->hash[0] == 0 && n->hash[1] == 0)
     {
         /* Fresh, empty bucket. Nothing to do. */
         return;
     }
 
     /* Search linearly through the linked list of hashmap nodes for the
-     * exact key. */
+     * exact hash. */
     prev = NULL;
     for (;;)
     {
         struct hashmap_node *next = n->next;
-        if (n->key_len == key_len && memcmp(n->key, key, key_len) == 0)
+        if (n->hash[0] == hash[0] && n->hash[1] == hash[1])
         {
-            /* Found matching key. */
+            /* Found matching hash. */
             hashmap->length -= 1;
             if (prev)
             {
@@ -222,8 +205,6 @@ void hashmap_del(struct hashmap *hashmap,
                 else
                 {
                     /* There is only one node in the bucket. */
-                    n->key_len = 0;
-                    n->key = NULL;
                     n->hash[0] = 0;
                     n->hash[1] = 0;
                     n->value = 0;
@@ -233,13 +214,13 @@ void hashmap_del(struct hashmap *hashmap,
             return;
         }
 
-        /* End of list; didn't find key */
+        /* End of list; didn't find hash */
         if (n->next == NULL)
         {
             break;
         }
 
-        /* Didn't find a matching key. Look at the next node. */
+        /* Didn't find a matching hash. Look at the next node. */
         prev = n;
         n = next;
     }
