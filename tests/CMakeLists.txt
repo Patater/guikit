@@ -13,10 +13,16 @@ enable_warnings(test_hash)
 add_test(NAME hash COMMAND test_hash)
 
 add_executable(test_hashmap
+    ../src/hashmap.c
+    ../src/panic.c
+    ../src/pmemory.c
     hashmap.c
     test.c
 )
 target_link_libraries(test_hashmap PUBLIC guikit)
+target_include_directories(test_hashmap
+    PUBLIC ../include
+)
 enable_sanitizers(test_hashmap)
 enable_coverage(test_hashmap)
 enable_warnings(test_hashmap)
