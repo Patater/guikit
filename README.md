@@ -45,7 +45,7 @@ The Patater GUI Kit includes a number of demo applications (see
 - 128-bit xorshift pseudo random number generator
 - 64-bit FNV-1a hash
 - 32-bit FNV-1a hash
-- Hashmap
+- Linear probing hashmap
 - `snprintf()` for C89 toolchains
 - Handcrafted pixel icons
 
