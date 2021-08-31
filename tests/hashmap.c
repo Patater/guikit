@@ -443,11 +443,177 @@ static int hashmap_test_del(void)
     return 0;
 }
 
+static int hashmap_test_grows_when_more_added(void)
+{
+    struct hashmap *hashmap;
+    u32 key[2];
+    ptrdiff_t value;
+
+
+    /* Add 4 items and we expect the map to grow to be able to hold 16 items,
+     * given it starts as being able to hold 8. */
+    hashmap = hashmap_alloc();
+    TEST_EQU(hashmap_capacity(hashmap), 8);
+
+    key[0] = 0x0;
+    key[1] = 0xA;
+    value = 0;
+    hashmap_put(hashmap, key, value);
+    TEST_EQU(hashmap_length(hashmap), 1);
+    TEST_EQU(hashmap_capacity(hashmap), 8);
+
+    key[0] = 0x1;
+    key[1] = 0xA;
+    value = 1;
+    hashmap_put(hashmap, key, value);
+    TEST_EQU(hashmap_length(hashmap), 2);
+    TEST_EQU(hashmap_capacity(hashmap), 8);
+
+    key[0] = 0x2;
+    key[1] = 0xA;
+    value = 2;
+    hashmap_put(hashmap, key, value);
+    TEST_EQU(hashmap_length(hashmap), 3);
+    TEST_EQU(hashmap_capacity(hashmap), 8);
+
+    key[0] = 0x3;
+    key[1] = 0xA;
+    value = 3;
+    hashmap_put(hashmap, key, value);
+    TEST_EQU(hashmap_length(hashmap), 4);
+    TEST_EQU(hashmap_capacity(hashmap), 8);
+
+    key[0] = 0x4;
+    key[1] = 0xA;
+    value = 4;
+    hashmap_put(hashmap, key, value);
+    TEST_EQU(hashmap_length(hashmap), 5);
+    TEST_EQU(hashmap_capacity(hashmap), 16);
+    hashmap_free(hashmap);
+
+    return 0;
+}
+
+static int hashmap_test_grows_and_is_accessible(void)
+{
+    struct hashmap *hashmap;
+    u32 key[2];
+    ptrdiff_t value;
+
+
+    /* Add 9 items, one more than the original capacity, and verify we can read
+     * each value back out. */
+    hashmap = hashmap_alloc();
+    TEST_EQU(hashmap_capacity(hashmap), 8);
+
+    key[0] = 0x0;
+    key[1] = 0xA;
+    value = 0;
+    hashmap_put(hashmap, key, value);
+
+    key[0] = 0x1;
+    key[1] = 0xA;
+    value = 1;
+    hashmap_put(hashmap, key, value);
+
+    key[0] = 0x2;
+    key[1] = 0xA;
+    value = 2;
+    hashmap_put(hashmap, key, value);
+
+    key[0] = 0x3;
+    key[1] = 0xA;
+    value = 3;
+    hashmap_put(hashmap, key, value);
+
+    key[0] = 0x4;
+    key[1] = 0xA;
+    value = 4;
+    hashmap_put(hashmap, key, value);
+
+    key[0] = 0x5;
+    key[1] = 0xA;
+    value = 5;
+    hashmap_put(hashmap, key, value);
+
+    key[0] = 0x6;
+    key[1] = 0xA;
+    value = 6;
+    hashmap_put(hashmap, key, value);
+
+    key[0] = 0x7;
+    key[1] = 0xA;
+    value = 7;
+    hashmap_put(hashmap, key, value);
+
+    /* Ensure there is enough room for the 9th entry. */
+    TEST_GE(hashmap_capacity(hashmap), 9);
+
+    /* Add the 9th entry. */
+    key[0] = 0x8;
+    key[1] = 0xA;
+    value = 8;
+    hashmap_put(hashmap, key, value);
+    TEST_EQ(hashmap_length(hashmap), 9);
+
+    /* Ensure all keys we added are present. */
+    key[0] = 0x0;
+    key[1] = 0xA;
+    value = hashmap_get(hashmap, key);
+    TEST_EQ(value, 0);
+
+    key[0] = 0x1;
+    key[1] = 0xA;
+    value = hashmap_get(hashmap, key);
+    TEST_EQ(value, 1);
+
+    key[0] = 0x2;
+    key[1] = 0xA;
+    value = hashmap_get(hashmap, key);
+    TEST_EQ(value, 2);
+
+    key[0] = 0x3;
+    key[1] = 0xA;
+    value = hashmap_get(hashmap, key);
+    TEST_EQ(value, 3);
+
+    key[0] = 0x4;
+    key[1] = 0xA;
+    value = hashmap_get(hashmap, key);
+    TEST_EQ(value, 4);
+
+    key[0] = 0x5;
+    key[1] = 0xA;
+    value = hashmap_get(hashmap, key);
+    TEST_EQ(value, 5);
+
+    key[0] = 0x6;
+    key[1] = 0xA;
+    value = hashmap_get(hashmap, key);
+    TEST_EQ(value, 6);
+
+    key[0] = 0x7;
+    key[1] = 0xA;
+    value = hashmap_get(hashmap, key);
+    TEST_EQ(value, 7);
+
+    key[0] = 0x8;
+    key[1] = 0xA;
+    value = hashmap_get(hashmap, key);
+    TEST_EQ(value, 8);
+
+    hashmap_free(hashmap);
+
+    return 0;
+}
+
 const test_fn tests[] =
 {
     hashmap_test_get_nonexistent,
     hashmap_test_get_existent,
     hashmap_test_put,
     hashmap_test_del,
+    hashmap_test_grows_when_more_added,
+    hashmap_test_grows_and_is_accessible,
     0
 };
