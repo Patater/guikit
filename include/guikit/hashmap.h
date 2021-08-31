@@ -23,8 +23,8 @@ hashmap_get(const struct hashmap *hashmap,
 void hashmap_put(struct hashmap *hashmap,
                  const char *key, size_t key_len, ptrdiff_t value);
 
-void hashmap_remove(struct hashmap *hashmap,
-                    const char *key, size_t key_len);
+void hashmap_del(struct hashmap *hashmap,
+                 const char *key, size_t key_len);
 
 size_t hashmap_length(const struct hashmap *hashmap);
 
