@@ -173,9 +173,13 @@ static int hashmap_test_set(void)
 {
     struct hashmap *hashmap;
     ptrdiff_t set_value;
+    ptrdiff_t set_value1;
     ptrdiff_t set_value2;
+    ptrdiff_t set_value3;
     ptrdiff_t got_value;
+    ptrdiff_t got_value1;
     ptrdiff_t got_value2;
+    ptrdiff_t got_value3;
 
     /* Set when non-existent. */
     hashmap = hashmap_alloc();
@@ -258,6 +262,26 @@ static int hashmap_test_set(void)
     TEST_EQU(got_value2, set_value2);
     hashmap_free(hashmap);
 
+    /* Set when existent in collision bucket in middle. */
+    hashmap = hashmap_alloc();
+    set_value = 0x0000000dUL;
+    set_value1 = 0xf00dfaceUL;
+    set_value2 = 0xc001d00dUL;
+    set_value3 = 0x5a5aa5a5UL;
+    hashmap_set(hashmap, "triple_collision_1", sizeof("triple_collision_1") - 1, set_value1);
+    hashmap_set(hashmap, "triple_collision_2", sizeof("triple_collision_2") - 1, set_value2);
+    hashmap_set(hashmap, "triple_collision_3", sizeof("triple_collision_3") - 1, set_value3);
+    TEST_EQU(hashmap_length(hashmap), 3);
+    TEST_EQU(hashmap_num_collisions(hashmap), 2);
+    hashmap_set(hashmap, "triple_collision_2", sizeof("triple_collision_2") - 1, set_value);
+    got_value1 = hashmap_get(hashmap, "triple_collision_1", sizeof("triple_collision_1") - 1);
+    got_value = hashmap_get(hashmap, "triple_collision_2", sizeof("triple_collision_2") - 1);
+    got_value3 = hashmap_get(hashmap, "triple_collision_3", sizeof("triple_collision_3") - 1);
+    TEST_EQU(got_value1, set_value1);
+    TEST_EQU(got_value, set_value);
+    TEST_EQU(got_value3, set_value3);
+    hashmap_free(hashmap);
+
     return 0;
 }
 
@@ -333,38 +357,6 @@ static int hashmap_test_remove(void)
     got_value2 = hashmap_get(hashmap, "declinate", sizeof("declinate") - 1);
     TEST_EQU(got_value2, set_value2);
     hashmap_free(hashmap);
-
-    /* Set when existent in collision bucket in middle. */
-    /* This requires a triple collision, which we don't have available
-     * currently... */
-    #if 0
-    hashmap = hashmap_alloc();
-    hashmap->bucket[i].key_len = sizeof("collision") - 1;
-    hashmap->bucket[i].key = "collision";
-    hashmap->bucket[i].hash = h;
-    hashmap->bucket[i].value = 0xc001d00dUL;
-    hashmap->bucket[i].next = pmalloc(sizeof(*hashmap->bucket[i].next));
-    hashmap->bucket[i].next->key_len = sizeof("badegg") - 1;
-    hashmap->bucket[i].next->key = "badegg";
-    hashmap->bucket[i].next->hash = h;
-    hashmap->bucket[i].next->value = 0x0badbeefUL;
-    hashmap->bucket[i].next->next = pmalloc(sizeof(*hashmap->bucket[i].next));
-    hashmap->bucket[i].next->next->key_len = sizeof("frogman") - 1;
-    hashmap->bucket[i].next->next->key = "frogman";
-    hashmap->bucket[i].next->next->hash = h;
-    hashmap->bucket[i].next->next->value = 0xf00dfaceUL;
-    hashmap->bucket[i].next->next->next = NULL;
-    hashmap->length = 3;
-    hashmap->num_collisions = 2;
-    hashmap_remove(hashmap, "badegg", sizeof("badegg") - 1);
-    TEST_EQU(hashmap->length, 2);
-    TEST_EQU(hashmap->num_collisions, 2);
-    TEST_EQU(hashmap->bucket[i].value, 0xc001d00dUL);
-    TEST_NEP(hashmap->bucket[i].next, NULL);
-    TEST_EQU(hashmap->bucket[i].next->value, 0xf00dfaceUL);
-    TEST_EQU(hashmap->bucket[i].next->next, NULL);
-    hashmap_free(hashmap);
-    #endif
 
     return 0;
 }
