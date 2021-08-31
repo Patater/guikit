@@ -300,7 +300,7 @@ static int hashmap_test_put(void)
     return 0;
 }
 
-static int hashmap_test_remove(void)
+static int hashmap_test_del(void)
 {
     struct hashmap *hashmap;
     ptrdiff_t set_value;
@@ -312,7 +312,7 @@ static int hashmap_test_remove(void)
     hashmap = hashmap_alloc();
     TEST_EQU(hashmap_length(hashmap), 0);
     TEST_EQU(hashmap_num_collisions(hashmap), 0);
-    hashmap_remove(hashmap, "badegg", sizeof("badegg") - 1);
+    hashmap_del(hashmap, "badegg", sizeof("badegg") - 1);
     TEST_EQU(hashmap_length(hashmap), 0);
     hashmap_free(hashmap);
 
@@ -323,7 +323,7 @@ static int hashmap_test_remove(void)
     hashmap = hashmap_alloc();
     set_value = 0xbabebeefUL;
     hashmap_put(hashmap, "costarring", sizeof("costarring") - 1, set_value);
-    hashmap_remove(hashmap, "liquid", sizeof("liquid") - 1);
+    hashmap_del(hashmap, "liquid", sizeof("liquid") - 1);
     TEST_EQU(hashmap_length(hashmap), 1);
     got_value = hashmap_get(hashmap, "costarring", sizeof("costarring") - 1);
     TEST_EQU(got_value, set_value);
@@ -333,7 +333,7 @@ static int hashmap_test_remove(void)
     hashmap = hashmap_alloc();
     set_value = 0x50f7beefUL;
     hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, set_value);
-    hashmap_remove(hashmap, "macallums", sizeof("macallums") - 1);
+    hashmap_del(hashmap, "macallums", sizeof("macallums") - 1);
     TEST_EQU(hashmap_length(hashmap), 1);
     got_value = hashmap_get(hashmap, "declinate", sizeof("declinate") - 1);
     TEST_EQU(got_value, set_value);
@@ -343,7 +343,7 @@ static int hashmap_test_remove(void)
     hashmap = hashmap_alloc();
     set_value = 0xf00dfaceUL;
     hashmap_put(hashmap, "badegg", sizeof("badegg") - 1, set_value);
-    hashmap_remove(hashmap, "badegg", sizeof("badegg") - 1);
+    hashmap_del(hashmap, "badegg", sizeof("badegg") - 1);
     TEST_EQU(hashmap_length(hashmap), 0);
     hashmap_free(hashmap);
 
@@ -353,7 +353,7 @@ static int hashmap_test_remove(void)
     set_value2 = 0xc001d00dUL;
     hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, set_value);
     hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
-    hashmap_remove(hashmap, "macallums", sizeof("macallums") - 1);
+    hashmap_del(hashmap, "macallums", sizeof("macallums") - 1);
     TEST_EQU(hashmap_length(hashmap), 1);
     TEST_EQU(hashmap_num_collisions(hashmap), 1);
     got_value2 = hashmap_get(hashmap, "declinate", sizeof("declinate") - 1);
@@ -366,7 +366,7 @@ static int hashmap_test_remove(void)
     set_value2 = 0xc001d00dUL;
     hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
     hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, set_value);
-    hashmap_remove(hashmap, "macallums", sizeof("macallums") - 1);
+    hashmap_del(hashmap, "macallums", sizeof("macallums") - 1);
     TEST_EQU(hashmap_length(hashmap), 1);
     TEST_EQU(hashmap_num_collisions(hashmap), 1);
     got_value2 = hashmap_get(hashmap, "declinate", sizeof("declinate") - 1);
@@ -381,6 +381,6 @@ const test_fn tests[] =
     hashmap_test_get_nonexistent,
     hashmap_test_get_existent,
     hashmap_test_put,
-    hashmap_test_remove,
+    hashmap_test_del,
     0
 };
