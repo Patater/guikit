@@ -752,6 +752,7 @@ const test_fn tests[] =
 
     rectUnionOverlap,
     rectUnionWithEmptySecondIsSelf,
+    rectUnionEmptyIsSelf,
     rectUnionWithEmptyFirstIsSelf,
     rectIntersectOverlap,
     rectIntersectNoOverlap,
