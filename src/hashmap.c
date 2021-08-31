@@ -26,7 +26,7 @@ struct hashmap_node
 {
     size_t key_len;
     const char *key;
-    unsigned long hash;
+    u32 hash[2];
     ptrdiff_t value;
     struct hashmap_node *next;
 };
@@ -72,19 +72,19 @@ void hashmap_free(struct hashmap *hashmap)
     pfree(hashmap);
 }
 
-static size_t hash_to_index(unsigned long hash, size_t capacity)
+static size_t hash_to_index(u32 hash[], size_t capacity)
 {
-    return hash % capacity;
+    return hash[0] % capacity;
 }
 
 ptrdiff_t hashmap_get(const struct hashmap *hashmap,
                       const char *key, size_t key_len)
 {
-    unsigned long h;
+    u32 h[2];
     size_t i;
     struct hashmap_node *n;
 
-    h = hash(key, key_len);
+    hash64(h, key, key_len);
     i = hash_to_index(h, hashmap->capacity);
 
     n = &hashmap->bucket[i];
@@ -117,11 +117,11 @@ ptrdiff_t hashmap_get(const struct hashmap *hashmap,
 void hashmap_set(struct hashmap *hashmap,
                  const char *key, size_t key_len, ptrdiff_t value)
 {
-    unsigned long h;
+    u32 h[2];
     size_t i;
     struct hashmap_node *n;
 
-    h = hash(key, key_len);
+    hash64(h, key, key_len);
     i = hash_to_index(h, hashmap->capacity);
 
     n = &hashmap->bucket[i];
@@ -131,7 +131,8 @@ void hashmap_set(struct hashmap *hashmap,
         hashmap->length += 1;
         n->key_len = key_len;
         n->key = key;
-        n->hash = h;
+        n->hash[0] = h[0];
+        n->hash[1] = h[1];
         n->value = value;
         n->next = NULL;
 
@@ -166,7 +167,8 @@ void hashmap_set(struct hashmap *hashmap,
     n->next = pmalloc(sizeof(*n->next));
     n->next->key_len = key_len;
     n->next->key = key;
-    n->next->hash = h;
+    n->next->hash[0] = h[0];
+    n->next->hash[1] = h[1];
     n->next->value = value;
     n->next->next = NULL;
 
@@ -176,12 +178,12 @@ void hashmap_set(struct hashmap *hashmap,
 void hashmap_remove(struct hashmap *hashmap,
                     const char *key, size_t key_len)
 {
-    unsigned long h;
+    u32 h[2];
     size_t i;
     struct hashmap_node *n;
     struct hashmap_node *prev;
 
-    h = hash(key, key_len);
+    hash64(h, key, key_len);
     i = hash_to_index(h, hashmap->capacity);
 
     n = &hashmap->bucket[i];
@@ -223,7 +225,8 @@ void hashmap_remove(struct hashmap *hashmap,
                     /* There is only one node in the bucket. */
                     n->key_len = 0;
                     n->key = NULL;
-                    n->hash = 0;
+                    n->hash[0] = 0;
+                    n->hash[1] = 0;
                     n->value = 0;
                     n->next = NULL;
                 }

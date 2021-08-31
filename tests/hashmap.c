@@ -6,74 +6,89 @@
  *  Copyright 2019. SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+#include "guikit/hash.h"
 #include "guikit/hashmap.h"
 #include "test.h"
 
 /* Mock hash */
-unsigned long hash(const char *buf, size_t len)
+void hash64(u32 out[], const char *buf, size_t len)
 {
     if (len == sizeof("magic_key") - 1 && memcmp(buf, "magic_key", len) == 0)
     {
-        return 0xA;
+        out[0] = 0xA;
+        return;
     }
     else if (len == sizeof("dead_key") - 1
              && memcmp(buf, "dead_key", len) == 0)
     {
-        return 0xB;
+        out[0] = 0xB;
+        return;
     }
     else if (len == sizeof("costarring") - 1
              && memcmp(buf, "costarring", len) == 0)
     {
-        return 0xC; /* collides with liquid */
+        out[0] = 0xC; /* collides with liquid */
+        return;
     }
     else if (len == sizeof("liquid") - 1 && memcmp(buf, "liquid", len) == 0)
     {
-        return 0xC; /* collides with costarring */
+        out[0] = 0xC; /* collides with costarring */
+        return;
     }
     else if (len == sizeof("declinate") - 1
              && memcmp(buf, "declinate", len) == 0)
     {
-        return 0xD; /* collides with macallums */
+        out[0] = 0xD; /* collides with macallums */
+        return;
     }
     else if (len == sizeof("macallums") - 1
              && memcmp(buf, "macallums", len) == 0)
     {
-        return 0xD; /* collides with declinate */
+        out[0] = 0xD; /* collides with declinate */
+        return;
     }
     else if (len == sizeof("nacallumz") - 1
              && memcmp(buf, "nacallumz", len) == 0)
     {
-        return 0xE;
+        out[0] = 0xE;
+        return;
     }
     else if (len == sizeof("parcel") - 1 && memcmp(buf, "parcel", len) == 0)
     {
-        return 0xF;
+        out[0] = 0xF;
+        return;
     }
     else if (len == sizeof("frogman") - 1 && memcmp(buf, "frogman", len) == 0)
     {
-        return 0x1;
+        out[0] = 0x1;
+        return;
     }
     else if (len == sizeof("badegg") - 1 && memcmp(buf, "badegg", len) == 0)
     {
-        return 0x2;
+        out[0] = 0x2;
+        return;
     }
     else if (len == sizeof("triple_collision_1") - 1
              && memcmp(buf, "triple_collision_1", len) == 0)
     {
-        return 0x3;
+        out[0] = 0x3;
+        return;
     }
     else if (len == sizeof("triple_collision_2") - 1
              && memcmp(buf, "triple_collision_2", len) == 0)
     {
-        return 0x3;
+        out[0] = 0x3;
+        return;
     }
     else if (len == sizeof("triple_collision_3") - 1
              && memcmp(buf, "triple_collision_3", len) == 0)
     {
-        return 0x3;
+        out[0] = 0x3;
+        return;
     }
 
-    return 0xFFFFFFFFUL;
+    out[0] = 0xFFFFFFFFUL;
+    out[1] = 0xFFFFFFFFUL;
 }
 
 static int hashmap_test_get_nonexistent(void)
