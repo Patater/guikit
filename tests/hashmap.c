@@ -104,7 +104,7 @@ static int hashmap_test_get_nonexistent(void)
 
     /* Get non-existent from non-collision bucket */
     hashmap = hashmap_alloc();
-    hashmap_set(hashmap, "dead_key", sizeof("dead_key") - 1, 0xdeadbeefUL);
+    hashmap_put(hashmap, "dead_key", sizeof("dead_key") - 1, 0xdeadbeefUL);
     value = hashmap_get(hashmap, "magic_key", sizeof("magic_key") - 1);
     TEST_EQ(value, 0);
     hashmap_free(hashmap);
@@ -115,8 +115,8 @@ static int hashmap_test_get_nonexistent(void)
      * https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed/145633#145633
      */
     hashmap = hashmap_alloc();
-    hashmap_set(hashmap, "costarring", sizeof("costarring") - 1, 0x02UL);
-    hashmap_set(hashmap, "liquid", sizeof("liquid") - 1, 0x03UL);
+    hashmap_put(hashmap, "costarring", sizeof("costarring") - 1, 0x02UL);
+    hashmap_put(hashmap, "liquid", sizeof("liquid") - 1, 0x03UL);
     value = hashmap_get(hashmap, "magic_key", sizeof("magic_key") - 1);
     TEST_EQ(value, 0);
     hashmap_free(hashmap);
@@ -128,8 +128,8 @@ static int hashmap_test_get_nonexistent(void)
      * https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed/145633#145633
      */
     hashmap = hashmap_alloc();
-    hashmap_set(hashmap, "declinate", sizeof("declinate") - 1, 0x02UL);
-    hashmap_set(hashmap, "macallums", sizeof("macallums") - 1, 0x03UL);
+    hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, 0x02UL);
+    hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, 0x03UL);
     value = hashmap_get(hashmap, "nacallumz", sizeof("nacallumz") - 1);
     TEST_EQ(value, 0);
     hashmap_free(hashmap);
@@ -137,7 +137,7 @@ static int hashmap_test_get_nonexistent(void)
     /* Get non-existent key from a bucket with a colliding key, where our key
      * collides, but has a different length. */
     hashmap = hashmap_alloc();
-    hashmap_set(hashmap, "costarring", sizeof("costarring") - 1, 0x02UL);
+    hashmap_put(hashmap, "costarring", sizeof("costarring") - 1, 0x02UL);
     value = hashmap_get(hashmap, "liquid", sizeof("liquid") - 1);
     TEST_EQ(value, 0);
     hashmap_free(hashmap);
@@ -145,7 +145,7 @@ static int hashmap_test_get_nonexistent(void)
     /* Get non-existent key from a bucket with a colliding key, where our key
      * collides, and has the same length, but is a different key. */
     hashmap = hashmap_alloc();
-    hashmap_set(hashmap, "declinate", sizeof("declinate") - 1, 0x02UL);
+    hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, 0x02UL);
     value = hashmap_get(hashmap, "macallums", sizeof("macallums") - 1);
     TEST_EQ(value, 0);
     hashmap_free(hashmap);
@@ -160,23 +160,23 @@ static int hashmap_test_get_existent(void)
 
     /* Get from non-collision bucket */
     hashmap = hashmap_alloc();
-    hashmap_set(hashmap, "parcel", sizeof("parcel") - 1, 0x04UL);
+    hashmap_put(hashmap, "parcel", sizeof("parcel") - 1, 0x04UL);
     value = hashmap_get(hashmap, "parcel", sizeof("parcel") - 1);
     TEST_EQ(value, 0x00000004UL);
     hashmap_free(hashmap);
 
     /* Get from collision bucket first */
     hashmap = hashmap_alloc();
-    hashmap_set(hashmap, "macallums", sizeof("macallums") - 1, 0x05UL);
-    hashmap_set(hashmap, "declinate", sizeof("declinate") - 1, 0x06UL);
+    hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, 0x05UL);
+    hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, 0x06UL);
     value = hashmap_get(hashmap, "macallums", sizeof("macallums") - 1);
     TEST_EQ(value, 0x00000005UL);
     hashmap_free(hashmap);
 
     /* Get from collision bucket last */
     hashmap = hashmap_alloc();
-    hashmap_set(hashmap, "declinate", sizeof("declinate") - 1, 0x07UL);
-    hashmap_set(hashmap, "macallums", sizeof("macallums") - 1, 0x08UL);
+    hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, 0x07UL);
+    hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, 0x08UL);
     value = hashmap_get(hashmap, "macallums", sizeof("macallums") - 1);
     TEST_EQ(value, 0x00000008UL);
     hashmap_free(hashmap);
@@ -184,7 +184,7 @@ static int hashmap_test_get_existent(void)
     return 0;
 }
 
-static int hashmap_test_set(void)
+static int hashmap_test_put(void)
 {
     struct hashmap *hashmap;
     ptrdiff_t set_value;
@@ -196,24 +196,24 @@ static int hashmap_test_set(void)
     ptrdiff_t got_value2;
     ptrdiff_t got_value3;
 
-    /* Set when non-existent. */
+    /* Put when non-existent. */
     hashmap = hashmap_alloc();
     TEST_EQU(hashmap_length(hashmap), 0);
     TEST_EQU(hashmap_num_collisions(hashmap), 0);
     set_value = 0x00000008UL;
-    hashmap_set(hashmap, "frogman", sizeof("frogman") - 1, set_value);
+    hashmap_put(hashmap, "frogman", sizeof("frogman") - 1, set_value);
     got_value = hashmap_get(hashmap, "frogman", sizeof("frogman") - 1);
     TEST_EQU(hashmap_length(hashmap), 1);
     TEST_EQU(hashmap_num_collisions(hashmap), 0);
     TEST_EQU(got_value, set_value);
     hashmap_free(hashmap);
 
-    /* Set when non-existent in collision bucket, diff key len. */
+    /* Put when non-existent in collision bucket, diff key len. */
     hashmap = hashmap_alloc();
     set_value = 0x00000009UL;
     set_value2 = 0xbabebeefUL;
-    hashmap_set(hashmap, "costarring", sizeof("costarring") - 1, set_value2);
-    hashmap_set(hashmap, "liquid", sizeof("liquid") - 1, set_value);
+    hashmap_put(hashmap, "costarring", sizeof("costarring") - 1, set_value2);
+    hashmap_put(hashmap, "liquid", sizeof("liquid") - 1, set_value);
     TEST_EQU(hashmap_length(hashmap), 2);
     TEST_EQU(hashmap_num_collisions(hashmap), 1);
     got_value = hashmap_get(hashmap, "liquid", sizeof("liquid") - 1);
@@ -222,12 +222,12 @@ static int hashmap_test_set(void)
     TEST_EQU(got_value, set_value);
     hashmap_free(hashmap);
 
-    /* Set when non-existent in collision bucket, diff key. */
+    /* Put when non-existent in collision bucket, diff key. */
     hashmap = hashmap_alloc();
     set_value = 0x0000000aUL;
     set_value2 = 0x50f7beefUL;
-    hashmap_set(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
-    hashmap_set(hashmap, "macallums", sizeof("macallums") - 1, set_value);
+    hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
+    hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, set_value);
     TEST_EQU(hashmap_length(hashmap), 2);
     TEST_EQU(hashmap_num_collisions(hashmap), 1);
     got_value = hashmap_get(hashmap, "macallums", sizeof("macallums") - 1);
@@ -236,24 +236,24 @@ static int hashmap_test_set(void)
     TEST_EQU(got_value, set_value);
     hashmap_free(hashmap);
 
-    /* Set when existent in non-collision bucket. */
+    /* Put when existent in non-collision bucket. */
     hashmap = hashmap_alloc();
     set_value = 0x0000000bUL;
-    hashmap_set(hashmap, "frogman", sizeof("frogman") - 1, 0xf00dfaceUL);
-    hashmap_set(hashmap, "frogman", sizeof("frogman") - 1, set_value);
+    hashmap_put(hashmap, "frogman", sizeof("frogman") - 1, 0xf00dfaceUL);
+    hashmap_put(hashmap, "frogman", sizeof("frogman") - 1, set_value);
     TEST_EQU(hashmap_length(hashmap), 1);
     TEST_EQU(hashmap_num_collisions(hashmap), 0);
     got_value = hashmap_get(hashmap, "frogman", sizeof("frogman") - 1);
     TEST_EQU(got_value, set_value);
     hashmap_free(hashmap);
 
-    /* Set when existent in collision bucket at front. */
+    /* Put when existent in collision bucket at front. */
     hashmap = hashmap_alloc();
     set_value = 0x0000000cUL;
     set_value2 = 0xc001d00dUL;
-    hashmap_set(hashmap, "macallums", sizeof("macallums") - 1, 0xf00dfaceUL);
-    hashmap_set(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
-    hashmap_set(hashmap, "macallums", sizeof("macallums") - 1, set_value);
+    hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, 0xf00dfaceUL);
+    hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
+    hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, set_value);
     TEST_EQU(hashmap_length(hashmap), 2);
     TEST_EQU(hashmap_num_collisions(hashmap), 1);
     got_value = hashmap_get(hashmap, "macallums", sizeof("macallums") - 1);
@@ -262,13 +262,13 @@ static int hashmap_test_set(void)
     TEST_EQU(got_value2, set_value2);
     hashmap_free(hashmap);
 
-    /* Set when existent in collision bucket at back. */
+    /* Put when existent in collision bucket at back. */
     hashmap = hashmap_alloc();
     set_value = 0x0000000dUL;
     set_value2 = 0xc001d00dUL;
-    hashmap_set(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
-    hashmap_set(hashmap, "macallums", sizeof("macallums") - 1, 0xf00dfaceUL);
-    hashmap_set(hashmap, "macallums", sizeof("macallums") - 1, set_value);
+    hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
+    hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, 0xf00dfaceUL);
+    hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, set_value);
     TEST_EQU(hashmap_length(hashmap), 2);
     TEST_EQU(hashmap_num_collisions(hashmap), 1);
     got_value = hashmap_get(hashmap, "macallums", sizeof("macallums") - 1);
@@ -277,18 +277,18 @@ static int hashmap_test_set(void)
     TEST_EQU(got_value2, set_value2);
     hashmap_free(hashmap);
 
-    /* Set when existent in collision bucket in middle. */
+    /* Put when existent in collision bucket in middle. */
     hashmap = hashmap_alloc();
     set_value = 0x0000000dUL;
     set_value1 = 0xf00dfaceUL;
     set_value2 = 0xc001d00dUL;
     set_value3 = 0x5a5aa5a5UL;
-    hashmap_set(hashmap, "triple_collision_1", sizeof("triple_collision_1") - 1, set_value1);
-    hashmap_set(hashmap, "triple_collision_2", sizeof("triple_collision_2") - 1, set_value2);
-    hashmap_set(hashmap, "triple_collision_3", sizeof("triple_collision_3") - 1, set_value3);
+    hashmap_put(hashmap, "triple_collision_1", sizeof("triple_collision_1") - 1, set_value1);
+    hashmap_put(hashmap, "triple_collision_2", sizeof("triple_collision_2") - 1, set_value2);
+    hashmap_put(hashmap, "triple_collision_3", sizeof("triple_collision_3") - 1, set_value3);
     TEST_EQU(hashmap_length(hashmap), 3);
     TEST_EQU(hashmap_num_collisions(hashmap), 2);
-    hashmap_set(hashmap, "triple_collision_2", sizeof("triple_collision_2") - 1, set_value);
+    hashmap_put(hashmap, "triple_collision_2", sizeof("triple_collision_2") - 1, set_value);
     got_value1 = hashmap_get(hashmap, "triple_collision_1", sizeof("triple_collision_1") - 1);
     got_value = hashmap_get(hashmap, "triple_collision_2", sizeof("triple_collision_2") - 1);
     got_value3 = hashmap_get(hashmap, "triple_collision_3", sizeof("triple_collision_3") - 1);
@@ -322,7 +322,7 @@ static int hashmap_test_remove(void)
      * the same we test that it isn't removed. */
     hashmap = hashmap_alloc();
     set_value = 0xbabebeefUL;
-    hashmap_set(hashmap, "costarring", sizeof("costarring") - 1, set_value);
+    hashmap_put(hashmap, "costarring", sizeof("costarring") - 1, set_value);
     hashmap_remove(hashmap, "liquid", sizeof("liquid") - 1);
     TEST_EQU(hashmap_length(hashmap), 1);
     got_value = hashmap_get(hashmap, "costarring", sizeof("costarring") - 1);
@@ -332,7 +332,7 @@ static int hashmap_test_remove(void)
     /* Remove when non-existent in collision bucket, diff key. */
     hashmap = hashmap_alloc();
     set_value = 0x50f7beefUL;
-    hashmap_set(hashmap, "declinate", sizeof("declinate") - 1, set_value);
+    hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, set_value);
     hashmap_remove(hashmap, "macallums", sizeof("macallums") - 1);
     TEST_EQU(hashmap_length(hashmap), 1);
     got_value = hashmap_get(hashmap, "declinate", sizeof("declinate") - 1);
@@ -342,7 +342,7 @@ static int hashmap_test_remove(void)
     /* Remove when existent in non-collision bucket. */
     hashmap = hashmap_alloc();
     set_value = 0xf00dfaceUL;
-    hashmap_set(hashmap, "badegg", sizeof("badegg") - 1, set_value);
+    hashmap_put(hashmap, "badegg", sizeof("badegg") - 1, set_value);
     hashmap_remove(hashmap, "badegg", sizeof("badegg") - 1);
     TEST_EQU(hashmap_length(hashmap), 0);
     hashmap_free(hashmap);
@@ -351,8 +351,8 @@ static int hashmap_test_remove(void)
     hashmap = hashmap_alloc();
     set_value = 0xf00dfaceUL;
     set_value2 = 0xc001d00dUL;
-    hashmap_set(hashmap, "macallums", sizeof("macallums") - 1, set_value);
-    hashmap_set(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
+    hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, set_value);
+    hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
     hashmap_remove(hashmap, "macallums", sizeof("macallums") - 1);
     TEST_EQU(hashmap_length(hashmap), 1);
     TEST_EQU(hashmap_num_collisions(hashmap), 1);
@@ -364,8 +364,8 @@ static int hashmap_test_remove(void)
     hashmap = hashmap_alloc();
     set_value = 0xf00dfaceUL;
     set_value2 = 0xc001d00dUL;
-    hashmap_set(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
-    hashmap_set(hashmap, "macallums", sizeof("macallums") - 1, set_value);
+    hashmap_put(hashmap, "declinate", sizeof("declinate") - 1, set_value2);
+    hashmap_put(hashmap, "macallums", sizeof("macallums") - 1, set_value);
     hashmap_remove(hashmap, "macallums", sizeof("macallums") - 1);
     TEST_EQU(hashmap_length(hashmap), 1);
     TEST_EQU(hashmap_num_collisions(hashmap), 1);
@@ -380,7 +380,7 @@ const test_fn tests[] =
 {
     hashmap_test_get_nonexistent,
     hashmap_test_get_existent,
-    hashmap_test_set,
+    hashmap_test_put,
     hashmap_test_remove,
     0
 };
