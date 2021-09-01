@@ -39,6 +39,7 @@ static size_t array_cap(const void *a);
  * Implementation
  */
 
+/* LCOV_EXCL_START */
 void arrayUnusedFunctionWarningEliminator()
 {
     /* To avoid warnings like:
@@ -53,6 +54,7 @@ void arrayUnusedFunctionWarningEliminator()
     (void)array_cap;
     (void)array_len;
 }
+/* LCOV_EXCL_STOP */
 
 static size_t max(size_t x, size_t y)
 {
