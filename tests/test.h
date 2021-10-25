@@ -240,5 +240,13 @@ typedef int (*test_fn)(void);
 
 /* Pointer to a string representing the current test name */
 extern const char *testName;
+#define TEST(x) \
+static int do_ ## x(void); \
+static int x(void) \
+{ \
+    testName = #x; \
+    return do_ ## x(); \
+} \
+static int do_ ## x(void)
 
 #endif
