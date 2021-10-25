@@ -12,6 +12,8 @@
 #define PUTT_TEST_FAIL 125
 #define PUTT_TEST_PASS 0
 
+const char *testName;
+
 /* The list of tests will come from another file. We just run them. The list is
  * an array that is zero-terminated, so we know there should be at least one
  * element. */

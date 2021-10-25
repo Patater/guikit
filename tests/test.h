@@ -48,10 +48,10 @@ enum
         if (!(c)) \
         { \
             (void)("LCOV_EXCL_START"); \
-            printf(COLOR_START __FILE__ \
+            printf(COLOR_START "%s\n" __FILE__ \
                    ":%d" COLOR_CONT "\nTest failed: '%s' " \
                    "(expected true, was false)" COLOR_END "\n", \
-                   COLOR_FAIL, __LINE__, #cond); \
+                   COLOR_FAIL, testName, __LINE__, #cond); \
             TEST_FAIL(); \
             (void)("LCOV_EXCL_STOP"); \
         } \
@@ -64,10 +64,10 @@ enum
         if (c) \
         { \
             (void)("LCOV_EXCL_START"); \
-            printf(COLOR_START __FILE__ \
+            printf(COLOR_START "%s\n" __FILE__ \
                    ":%d" COLOR_CONT "\nTest failed: '%s' " \
                    "(expected false, was true)" COLOR_END "\n", \
-                   COLOR_FAIL, __LINE__, #cond); \
+                   COLOR_FAIL, testName, __LINE__, #cond); \
             TEST_FAIL(); \
             (void)("LCOV_EXCL_STOP"); \
         } \
@@ -81,10 +81,10 @@ enum
         if (!(a_val == b_val)) \
         { \
             (void)("LCOV_EXCL_START"); \
-            printf(COLOR_START __FILE__ \
+            printf(COLOR_START "%s\n" __FILE__ \
                    ":%d" COLOR_CONT "\nTest failed: '%s == %s' " \
                    "(%s=" #ts ", %s=" #ts ")" COLOR_END "\n", \
-                   COLOR_FAIL, __LINE__, #a, #b, #a, a_val, #b, b_val); \
+                   COLOR_FAIL, testName, __LINE__, #a, #b, #a, a_val, #b, b_val); \
             TEST_FAIL(); \
             (void)("LCOV_EXCL_STOP"); \
         } \
@@ -98,10 +98,10 @@ enum
         if (!(a_val != b_val)) \
         { \
             (void)("LCOV_EXCL_START"); \
-            printf(COLOR_START __FILE__ \
+            printf(COLOR_START "%s\n" __FILE__ \
                    ":%d" COLOR_CONT "\nTest failed: '%s != %s' " \
                    "(%s=" #ts ", %s=" #ts ")" COLOR_END "\n", \
-                   COLOR_FAIL, __LINE__, #a, #b, #a, a_val, #b, b_val); \
+                   COLOR_FAIL, testName, __LINE__, #a, #b, #a, a_val, #b, b_val); \
             TEST_FAIL(); \
             (void)("LCOV_EXCL_STOP"); \
         } \
@@ -115,10 +115,10 @@ enum
         if (!(a_val > b_val)) \
         { \
             (void)("LCOV_EXCL_START"); \
-            printf(COLOR_START __FILE__ \
+            printf(COLOR_START "%s\n" __FILE__ \
                    ":%d" COLOR_CONT "\nTest failed: '%s > %s' " \
                    "(%s=" #ts ", %s=" #ts ")" COLOR_END "\n", \
-                   COLOR_FAIL, __LINE__, #a, #b, #a, a_val, #b, b_val); \
+                   COLOR_FAIL, testName, __LINE__, #a, #b, #a, a_val, #b, b_val); \
             TEST_FAIL(); \
             (void)("LCOV_EXCL_STOP"); \
         } \
@@ -132,10 +132,10 @@ enum
         if (!(a_val < b_val)) \
         { \
             (void)("LCOV_EXCL_START"); \
-            printf(COLOR_START __FILE__ \
+            printf(COLOR_START "%s\n" __FILE__ \
                    ":%d" COLOR_CONT "\nTest failed: '%s < %s' " \
                    "(%s=" #ts ", %s=" #ts ")" COLOR_END "\n", \
-                   COLOR_FAIL, __LINE__, #a, #b, #a, a_val, #b, b_val); \
+                   COLOR_FAIL, testName, __LINE__, #a, #b, #a, a_val, #b, b_val); \
             TEST_FAIL(); \
             (void)("LCOV_EXCL_STOP"); \
         } \
@@ -149,10 +149,10 @@ enum
         if (!(a_val >= b_val)) \
         { \
             (void)("LCOV_EXCL_START"); \
-            printf(COLOR_START __FILE__ \
+            printf(COLOR_START "%s\n" __FILE__ \
                    ":%d" COLOR_CONT "\nTest failed: '%s >= %s' " \
                    "(%s=" #ts ", %s=" #ts ")" COLOR_END "\n", \
-                   COLOR_FAIL, __LINE__, #a, #b, #a, a_val, #b, b_val); \
+                   COLOR_FAIL, testName, __LINE__, #a, #b, #a, a_val, #b, b_val); \
             TEST_FAIL(); \
             (void)("LCOV_EXCL_STOP"); \
         } \
@@ -166,10 +166,10 @@ enum
         if (!(a_val <= b_val)) \
         { \
             (void)("LCOV_EXCL_START"); \
-            printf(COLOR_START __FILE__ \
+            printf(COLOR_START "%s\n" __FILE__ \
                    ":%d" COLOR_CONT "\nTest failed: '%s <= %s' " \
                    "(%s=" #ts ", %s=" #ts ")" COLOR_END "\n", \
-                   COLOR_FAIL, __LINE__, #a, #b, #a, a_val, #b, b_val); \
+                   COLOR_FAIL, testName, __LINE__, #a, #b, #a, a_val, #b, b_val); \
             TEST_FAIL(); \
             (void)("LCOV_EXCL_STOP"); \
         } \
@@ -209,10 +209,10 @@ enum
         if (strcmp(a_val, b_val)) \
         { \
             (void)("LCOV_EXCL_START"); \
-            printf(COLOR_START __FILE__ \
+            printf(COLOR_START "%s\n" __FILE__ \
                    ":%d" COLOR_CONT "\nTest failed: '%s == %s' " \
                    "(%s=\"%s\", %s=\"%s\")" COLOR_END "\n", \
-                   COLOR_FAIL, __LINE__, #a, #b, #a, a_val, #b, b_val); \
+                   COLOR_FAIL, testName, __LINE__, #a, #b, #a, a_val, #b, b_val); \
             TEST_FAIL(); \
             (void)("LCOV_EXCL_STOP"); \
         } \
@@ -227,15 +227,18 @@ enum
         if (memcmp(a_val, b_val, len)) \
         { \
             (void)("LCOV_EXCL_START"); \
-            printf(COLOR_START __FILE__ \
+            printf(COLOR_START "%s\n" __FILE__ \
                    ":%d" COLOR_CONT "\nTest failed: '%s == %s' " \
                    "(%s=\"%s\", %s=\"%s\")" COLOR_END "\n", \
-                   COLOR_FAIL, __LINE__, #a, #b, #a, a_val, #b, b_val); \
+                   COLOR_FAIL, testName, __LINE__, #a, #b, #a, a_val, #b, b_val); \
             TEST_FAIL(); \
             (void)("LCOV_EXCL_STOP"); \
         } \
     } while (0)
 
 typedef int (*test_fn)(void);
+
+/* Pointer to a string representing the current test name */
+extern const char *testName;
 
 #endif
