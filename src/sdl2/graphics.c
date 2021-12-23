@@ -38,8 +38,8 @@ static const struct SDL_Color mac_pal[] = {
 const unsigned char blackPattern[] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 static SDL_Window *window;
-static SDL_Surface *screen;
 static SDL_Surface *surface;
+static SDL_Renderer *renderer;
 static Uint8 *pixels;
 static int pitch;
 static Uint32 penColor;
@@ -81,8 +81,8 @@ int InitGraphics(void)
         panic("SDL Error: %s\n", SDL_GetError());
     }
 
-    screen = SDL_GetWindowSurface(window);
-    if (screen == NULL)
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL)
     {
         panic("SDL Error: %s\n", SDL_GetError());
     }
@@ -121,8 +121,8 @@ int InitGraphics(void)
 
 void FreeGraphics(void)
 {
-    SDL_FreeSurface(screen);
     SDL_FreeSurface(surface);
+    SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
@@ -130,23 +130,26 @@ void FreeGraphics(void)
 void ShowGraphics(void)
 {
     int ret;
+    SDL_Texture *texture;
 
     /* Seems needed on mac for some reason, otherwise window doesn't show up...
      * */
     SDL_Event event;
     SDL_PollEvent(&event);
 
-    ret = SDL_BlitSurface(surface, NULL, screen, NULL);
+    texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (texture == 0)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+    ret = SDL_RenderCopy(renderer, texture, NULL, NULL);
     if (ret < 0)
     {
         panic("SDL Error: %s\n", SDL_GetError());
     }
 
-    ret = SDL_UpdateWindowSurface(window);
-    if (ret < 0)
-    {
-        panic("SDL Error: %s\n", SDL_GetError());
-    }
+    SDL_RenderPresent(renderer);
+    SDL_DestroyTexture(texture); /* It'd be nice to re-use the texture... */
 }
 
 int SaveScreenShot(const char *path)
