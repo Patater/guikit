@@ -114,17 +114,7 @@ int InitGraphics(void)
         panic("SDL Error: %s\n", SDL_GetError());
     }
 
-    ret = SDL_BlitSurface(surface, NULL, screen, NULL);
-    if (ret < 0)
-    {
-        panic("SDL Error: %s\n", SDL_GetError());
-    }
-
-    ret = SDL_UpdateWindowSurface(window);
-    if (ret < 0)
-    {
-        panic("SDL Error: %s\n", SDL_GetError());
-    }
+    ShowGraphics();
 
     return 0;
 }
