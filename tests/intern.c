@@ -7,7 +7,7 @@
  */
 
 #include "guikit/intern.h"
-#include "test.h"
+#include "ptest/test.h"
 
 static int test_initial_state(void)
 {

@@ -7,7 +7,7 @@
  */
 
 #include "guikit/primrect.h"
-#include "test.h"
+#include "ptest/test.h"
 
 static int rectangleIsClippedNW(void)
 {

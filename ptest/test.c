@@ -6,7 +6,7 @@
  *  Copyright 2019. SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-#include "test.h"
+#include "ptest/test.h"
 #include <stdio.h>
 
 #define PUTT_TEST_FAIL 125

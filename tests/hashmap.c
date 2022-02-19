@@ -8,7 +8,7 @@
 
 #include "guikit/hash.h"
 #include "guikit/hashmap.h"
-#include "test.h"
+#include "ptest/test.h"
 
 /* Mock hash */
 void hash64(u32 out[], const char *buf, size_t len)

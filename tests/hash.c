@@ -7,7 +7,7 @@
  */
 
 #include "guikit/hash.h"
-#include "test.h"
+#include "ptest/test.h"
 
 static int hash_test_chongo(void)
 {

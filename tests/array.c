@@ -7,7 +7,7 @@
  */
 
 #include "guikit/array.h"
-#include "test.h"
+#include "ptest/test.h"
 
 static int test_null_array_len_0(void)
 {

@@ -4,9 +4,8 @@ include(../cmake/Warnings.cmake)
 
 add_executable(test_hash
     hash.c
-    test.c
 )
-target_link_libraries(test_hash PUBLIC guikit)
+target_link_libraries(test_hash PUBLIC guikit ptest)
 enable_sanitizers(test_hash)
 enable_coverage(test_hash)
 enable_warnings(test_hash)
@@ -17,9 +16,8 @@ add_executable(test_hashmap
     ../src/panic.c
     ../src/pmemory.c
     hashmap.c
-    test.c
 )
-target_link_libraries(test_hashmap PUBLIC guikit)
+target_link_libraries(test_hashmap PUBLIC guikit ptest)
 target_include_directories(test_hashmap
     PUBLIC ../include
 )
@@ -30,9 +28,8 @@ add_test(NAME hashmap COMMAND test_hashmap)
 
 add_executable(test_intern
     intern.c
-    test.c
 )
-target_link_libraries(test_intern PUBLIC guikit)
+target_link_libraries(test_intern PUBLIC guikit ptest)
 enable_sanitizers(test_intern)
 enable_coverage(test_intern)
 enable_warnings(test_intern)
@@ -40,9 +37,8 @@ add_test(NAME intern COMMAND test_intern)
 
 add_executable(test_primrect
     primrect.c
-    test.c
 )
-target_link_libraries(test_primrect PUBLIC guikit)
+target_link_libraries(test_primrect PUBLIC guikit ptest)
 enable_sanitizers(test_primrect)
 enable_coverage(test_primrect)
 enable_warnings(test_primrect)
@@ -50,9 +46,8 @@ add_test(NAME primrect COMMAND test_primrect)
 
 add_executable(test_array
     array.c
-    test.c
 )
-target_link_libraries(test_array PUBLIC guikit)
+target_link_libraries(test_array PUBLIC guikit ptest)
 enable_sanitizers(test_array)
 enable_coverage(test_array)
 enable_warnings(test_array)

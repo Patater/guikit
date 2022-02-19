@@ -5,6 +5,8 @@ project(guikit
     DESCRIPTION "Patater GUI Kit"
     LANGUAGES C)
 
+add_subdirectory(ptest)
+
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     include(CTest)
     add_subdirectory(tests)
