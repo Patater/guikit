@@ -25,6 +25,7 @@ The graphics library supports the following backends:
 
 - Raw VGA (no SVGA) in 640x480 16 color mode
 - SDL2, emulating VGA in 640x480 16 color mode
+- SDL2, emulating VESA VBE 1.0 in 640x480 BGR555 (15-bit) color mode
 
 ### Demo Screenshots
 

@@ -56,6 +56,69 @@ static Uint32 surfaceColor(int color)
     return SDL_MapRGBA(surface->format, c->r, c->g, c->b, c->a);
 }
 
+static Uint32 surfaceRGB(Uint8 r, Uint8 g, Uint8 b)
+{
+    return SDL_MapRGBA(surface->format, r, g, b, 0xFF);
+}
+
+/* TODO Add mode parameter to InitGraphics(), so we can pick 16 color or 16-bit
+ * color. */
+
+int InitGraphicsBGR555(const char *name)
+{
+    int ret;
+
+    currentPattern = blackPattern;
+
+    ret = SDL_Init(SDL_INIT_VIDEO);
+    if (ret < 0)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+
+    SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1", SDL_HINT_OVERRIDE);
+
+    /* Don't disable the compositor. */
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+
+    window = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED,
+                  SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH*2, SCREEN_HEIGHT*2,
+                  0 /* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
+    if (window == NULL)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+
+    /* Set up a BGR555 format surface */
+    surface =
+        SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 16, 0x001F,
+        0x03E0, 0x7C00, 0);
+    if (surface == NULL)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+    SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
+    pixels = surface->pixels;
+    pitch = surface->pitch;
+
+    /* Update the screen with the new surface. */
+    ret = SDL_FillRect(surface, NULL, surfaceRGB(0xFF, 0xFF, 0xFF));
+    if (ret < 0)
+    {
+        panic("SDL Error: %s\n", SDL_GetError());
+    }
+
+    ShowGraphics();
+
+    return 0;
+}
+
 int InitGraphics(void)
 {
     int ret;
@@ -169,6 +232,11 @@ void SetColor(int color)
 {
     setColor = color;
     penColor = surfaceColor(color);
+}
+
+void SetColorRGB(unsigned char r, unsigned char g, unsigned char b)
+{
+    penColor = surfaceRGB(r, g, b);
 }
 
 void FillScreen()

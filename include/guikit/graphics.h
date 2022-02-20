@@ -53,6 +53,7 @@ enum {
 };
 
 int InitGraphics(void);
+int InitGraphicsBGR555(const char *name);
 void FreeGraphics(void);
 
 /* Some graphics implementations render to a buffer and then copy to the screen
@@ -62,7 +63,9 @@ void FreeGraphics(void);
 void ShowGraphics(void);
 
 void SetColor(int color);
+void SetColorRGB(unsigned char r, unsigned char g, unsigned char b);
 void SetBGColor(int color);
+void SetBGColorRGB(unsigned char r, unsigned char g, unsigned char b);
 
 int SaveScreenShot(const char *path);
 
