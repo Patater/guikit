@@ -62,29 +62,29 @@ void FreeGraphics(void);
 void ShowGraphics(void);
 
 void SetColor(int color);
+void SetBGColor(int color);
 
 int SaveScreenShot(const char *path);
 
-void FillScreen(int color);
+void FillScreen(void);
 
-void DrawRect(int color, const struct Rect *rect);
-void FillRect(int color, const struct Rect *rect);
-void FillRectOp(int bg_color, int fg_color, const unsigned char *pattern,
-                int op, const struct Rect *rect);
+void DrawRect(const struct Rect *rect);
+void FillRect(const struct Rect *rect);
+void FillRectOp(const unsigned char *pattern, int op, const struct Rect *rect);
 
 void DrawVertLine(int x1, int y1, int len);
 void DrawHorizLine(int x1, int y1, int len);
 void DrawDiagLine(int x1, int y1, int x2, int len);
-void DrawLine(int color, int x1, int y1, int x2, int y2);
+void DrawLine(int x1, int y1, int x2, int y2);
 
-void DrawCircle(int color, int x0, int y0, int radius);
-void FillCircle(int color, int x0, int y0, int radius);
+void DrawCircle(int x0, int y0, int radius);
+void FillCircle(int x0, int y0, int radius);
 
-void DrawRoundRect(int color, int x0, int y0, int radius, int width, int height);
-void FillRoundRect(int color, int x0, int y0, int radius, int width, int height);
+void DrawRoundRect(int x0, int y0, int radius, int width, int height);
+void FillRoundRect(int x0, int y0, int radius, int width, int height);
 
 int DrawBitmap(const struct Rect *dst, int span, const unsigned char *img,
-               const unsigned char *mask, int color);
+               const unsigned char *mask);
 int DrawColorBitmap(const struct Rect *dst, int span, const unsigned char *img,
                     const unsigned char *mask);
 

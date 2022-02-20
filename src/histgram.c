@@ -161,7 +161,8 @@ static void drawBucket(int bval, int bwidth, int maxSize, int color, int x,
            bar.top);
 #endif
 
-    FillRect(color, &bar);
+    SetColor(color);
+    FillRect(&bar);
 }
 
 static void drawBuckets(const struct Histogram *h, int color,

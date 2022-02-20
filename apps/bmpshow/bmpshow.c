@@ -47,12 +47,13 @@ void RandomBitmaps(int num, int span, const unsigned char *img,
     for (i = 0; i < num; ++i)
     {
         color = RandRange(0, NUM_COLORS - 2); /* Exclude white */
+        SetColor(color);
         dst.left = RandRange(-width, SCREEN_WIDTH - 1);
         dst.top = RandRange(-height, SCREEN_HEIGHT - 1);
         dst.right = dst.left + width;
         dst.bottom = dst.top + height;
 
-        DrawBitmap(&dst, span, img, mask, color);
+        DrawBitmap(&dst, span, img, mask);
 
         ShowGraphics();
     }
@@ -103,7 +104,8 @@ int main(int argc, const char *argv[])
     }
 
     printf("Drawing 10000 bitmaps...\n");
-    FillScreen(COLOR_WHITE);
+    SetColor(COLOR_WHITE);
+    FillScreen();
     ShowGraphics();
     span = imgRect.right + 1;
     if (isColor(imgPlanes))

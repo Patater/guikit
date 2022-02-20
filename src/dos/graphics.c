@@ -429,7 +429,8 @@ int InitGraphics()
     set_gc(GC_DATA_ROTATE, 0);
     set_gc(GC_BIT_MASK, 0xFF);
 
-    FillScreen(COLOR_BLACK);
+    SetColor(COLOR_BLACK);
+    FillScreen();
 
     return 0;
 }

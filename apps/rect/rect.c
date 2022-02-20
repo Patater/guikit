@@ -26,13 +26,14 @@ void RandomRects(int num)
         rect.right = RandRange(-10, SCREEN_WIDTH + 9);
         rect.bottom = RandRange(-10, SCREEN_HEIGHT + 9);
         NormalizedRect(&rect, &rect);
+        SetColor(color);
         if (RandRange(0, 1) == 0)
         {
-            FillRect(color, &rect);
+            FillRect(&rect);
         }
         else
         {
-            DrawRect(color, &rect);
+            DrawRect(&rect);
         }
         ShowGraphics();
     }

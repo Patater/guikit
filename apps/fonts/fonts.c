@@ -600,8 +600,10 @@ void RandomText(int num)
         dst.right = dst.left + textWidth - 1;
         dst.bottom = dst.top + textHeight - 1;
 
-        FillRect(bgColor, &dst);
-        DrawString(font, text, fgColor, x, y);
+        SetColor(bgColor);
+        FillRect(&dst);
+        SetColor(fgColor);
+        DrawString(font, text, x, y);
 
         ShowGraphics();
     }
@@ -618,7 +620,8 @@ int main()
     }
 
     printf("Drawing 10000 strings...\n");
-    FillScreen(COLOR_WHITE);
+    SetColor(COLOR_WHITE);
+    FillScreen();
     ShowGraphics();
     RandomText(10000);
 

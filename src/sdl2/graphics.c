@@ -171,9 +171,9 @@ void SetColor(int color)
     penColor = surfaceColor(color);
 }
 
-void FillScreen(int color)
+void FillScreen()
 {
-    SDL_FillRect(surface, NULL, surfaceColor(color));
+    SDL_FillRect(surface, NULL, penColor);
 }
 
 static void drawVertLine(int x, int y, int len)
@@ -200,14 +200,12 @@ static void drawHorizLine(int x, int y, int len)
     SDL_FillRect(surface, &r, penColor);
 }
 
-void DrawRect(int color, const struct Rect *rect)
+void DrawRect(const struct Rect *rect)
 {
     int x;
     int y;
     int width;
     int height;
-
-    SetColor(color);
 
     x = rect->left;
     y = rect->top;
@@ -220,7 +218,7 @@ void DrawRect(int color, const struct Rect *rect)
     drawHorizLine(x + 1, y + height - 1, width - 2); /* Bottom */
 }
 
-void FillRect(int color, const struct Rect *rect)
+void FillRect(const struct Rect *rect)
 {
     SDL_Rect r;
 
@@ -229,18 +227,16 @@ void FillRect(int color, const struct Rect *rect)
     r.w = rect->right - rect->left + 1;
     r.h = rect->bottom - rect->top + 1;
 
-    SetColor(color);
     SDL_FillRect(surface, &r, penColor);
 }
 
-void FillRectOp(int bg_color, int fg_color, const unsigned char *pattern,
+void FillRectOp(const unsigned char *pattern,
                 int op, const struct Rect *rect)
 {
     /* TODO */
-    (void) bg_color;
     (void) pattern;
     (void) op;
-    FillRect(fg_color, rect);
+    FillRect(rect);
 }
 
 void DrawVertLine(int x1, int y1, int len)
@@ -345,7 +341,7 @@ void DrawDiagLine(int x1, int y1, int x2, int len)
 /* Algorithm from Michael Abrash's Graphics Programming Black Book, Chapter 37.
  * Variable names and comments kept similar for ease of comparison with the
  * text. */
-void DrawLine(int color, int x1, int y1, int x2, int y2)
+void DrawLine(int x1, int y1, int x2, int y2)
 {
     int AdjUp; /* Error term adjust up on each advance*/
     int AdjDown; /* Error term adjust down when error term turns over*/
@@ -356,8 +352,6 @@ void DrawLine(int color, int x1, int y1, int x2, int y2)
     int final_run_len;
     int run_len; /* aka step */
     int errorAdj;
-
-    SetColor(color);
 
     /*printf("(%03d,%03d)->(%03d,%03d)\r", x1, y1, x2, y2);*/
 
@@ -636,15 +630,13 @@ static void circlePoints(int x0, int y0, int x, int y)
     drawPixel(x0 - x, y0 + y);
 }
 
-void DrawCircle(int color, int x0, int y0, int radius)
+void DrawCircle(int x0, int y0, int radius)
 {
     int x;
     int y;
     int d;
     int deltaE;
     int deltaNE;
-
-    SetColor(color);
 
     /* Speed this up by accumulating horizontal, diagonal, and vertical line
      * segments. Draw each line segment reflected around in each octant. */
@@ -689,15 +681,13 @@ static void fillCirclePoints(int x0, int y0, int x, int y)
     drawHorizLine(x0 - x, y0 + y, x + x); /* Bottom */
 }
 
-void FillCircle(int color, int x0, int y0, int radius)
+void FillCircle(int x0, int y0, int radius)
 {
     int x;
     int y;
     int d;
     int deltaE;
     int deltaNE;
-
-    SetColor(color);
 
     /* Speed this up by accumulating horizontal, diagonal, and vertical line
      * segments. Draw each line segment reflected around in each octant. */
@@ -753,7 +743,7 @@ static void roundPoints(int x0, int y0, int radius, int x, int y, int width, int
     drawPixel(x0 - x + radius, y0 + y + height - radius - 1);
 }
 
-void DrawRoundRect(int color, int x0, int y0, int radius, int width, int height)
+void DrawRoundRect(int x0, int y0, int radius, int width, int height)
 {
     int x;
     int y;
@@ -763,8 +753,6 @@ void DrawRoundRect(int color, int x0, int y0, int radius, int width, int height)
 
     /* TODO Fix crash when radius is more curvy than a circle is allowed to be
      * */
-
-    SetColor(color);
 
     /* Draw rectangle portion, without corners */
     drawVertLine(x0, y0 + radius + 1, height - 2 - 2 * radius); /* Left */
@@ -821,8 +809,7 @@ static void fillRoundPoints(int x0, int y0, int radius, int x, int y, int width,
                   (x0 + x + width - radius) - (x0 - x + radius)); /* Bottom */
 }
 
-void FillRoundRect(int color, int x0, int y0, int radius, int width,
-                   int height)
+void FillRoundRect(int x0, int y0, int radius, int width, int height)
 {
     int x;
     int y;
@@ -831,14 +818,12 @@ void FillRoundRect(int color, int x0, int y0, int radius, int width,
     int deltaNE;
     struct Rect rect;
 
-    SetColor(color);
-
     /* Use FillRect() to set mode for us, and avoid extra register setting */
     rect.left = x0;
     rect.top = y0 + radius + 1;
     rect.right = rect.left + width - 1;
     rect.bottom = rect.top + height - radius - radius - 2 - 1;
-    FillRect(color, &rect);
+    FillRect(&rect);
 
     x = 0;
     y = radius;
@@ -930,11 +915,11 @@ int BlitWithMask(const unsigned char *img, const unsigned char *mask,
 
             /* Mode 0 */
             /* Copies the white as color. black as transparent. */
-            bitmapPixels[i] = imgByte & maskByte ? COLOR_TRANSPARENT : setColor;
+            bitmapPixels[i] = imgByte & maskByte ? COLOR_TRANSPARENT : penColor;
             /* Mode 3 */
             /* Like a stencil. Whereever is black is goes through to the color
              * */
-            bitmapPixels[i] = imgByte & maskByte ? setColor : COLOR_TRANSPARENT;
+            bitmapPixels[i] = imgByte & maskByte ? penColor : COLOR_TRANSPARENT;
         }
     }
     SDL_UnlockSurface(masked);
@@ -1075,11 +1060,11 @@ int BlitOp(const unsigned char *img, int op, const struct Rect *dst0,
 
             /* Mode 0 */
             /* Copies the white as color. black as transparent. */
-            bitmapPixels[i] = byte & mask ? COLOR_TRANSPARENT : setColor;
+            bitmapPixels[i] = byte & mask ? COLOR_TRANSPARENT : penColor;
             /* Mode 3 */
             /* Like a stencil. Whereever is black is goes through to the color
              * */
-            bitmapPixels[i] = byte & mask ? setColor : COLOR_TRANSPARENT;
+            bitmapPixels[i] = byte & mask ? penColor : COLOR_TRANSPARENT;
 
             ++curColInByte;
             if (curColInByte == 8)
@@ -1099,7 +1084,7 @@ int BlitOp(const unsigned char *img, int op, const struct Rect *dst0,
 }
 
 int DrawBitmap(const struct Rect *dst, int span, const unsigned char *img,
-               const unsigned char *mask, int color)
+               const unsigned char *mask)
 {
     SDL_Surface *masked;
     int x;
@@ -1154,35 +1139,35 @@ int DrawBitmap(const struct Rect *dst, int span, const unsigned char *img,
 
             bitmapPixels[i + 0] =
                 maskByte & (0x80 >> 0)
-                    ? imgByte & (0x80 >> 0) ? COLOR_WHITE : color
+                    ? imgByte & (0x80 >> 0) ? COLOR_WHITE : penColor
                     : COLOR_TRANSPARENT;
             bitmapPixels[i + 1] =
                 maskByte & (0x80 >> 1)
-                    ? imgByte & (0x80 >> 1) ? COLOR_WHITE : color
+                    ? imgByte & (0x80 >> 1) ? COLOR_WHITE : penColor
                     : COLOR_TRANSPARENT;
             bitmapPixels[i + 2] =
                 maskByte & (0x80 >> 2)
-                    ? imgByte & (0x80 >> 2) ? COLOR_WHITE : color
+                    ? imgByte & (0x80 >> 2) ? COLOR_WHITE : penColor
                     : COLOR_TRANSPARENT;
             bitmapPixels[i + 3] =
                 maskByte & (0x80 >> 3)
-                    ? imgByte & (0x80 >> 3) ? COLOR_WHITE : color
+                    ? imgByte & (0x80 >> 3) ? COLOR_WHITE : penColor
                     : COLOR_TRANSPARENT;
             bitmapPixels[i + 4] =
                 maskByte & (0x80 >> 4)
-                    ? imgByte & (0x80 >> 4) ? COLOR_WHITE : color
+                    ? imgByte & (0x80 >> 4) ? COLOR_WHITE : penColor
                     : COLOR_TRANSPARENT;
             bitmapPixels[i + 5] =
                 maskByte & (0x80 >> 5)
-                    ? imgByte & (0x80 >> 5) ? COLOR_WHITE : color
+                    ? imgByte & (0x80 >> 5) ? COLOR_WHITE : penColor
                     : COLOR_TRANSPARENT;
             bitmapPixels[i + 6] =
                 maskByte & (0x80 >> 6)
-                    ? imgByte & (0x80 >> 6) ? COLOR_WHITE : color
+                    ? imgByte & (0x80 >> 6) ? COLOR_WHITE : penColor
                     : COLOR_TRANSPARENT;
             bitmapPixels[i + 7] =
                 maskByte & (0x80 >> 7)
-                    ? imgByte & (0x80 >> 7) ? COLOR_WHITE : color
+                    ? imgByte & (0x80 >> 7) ? COLOR_WHITE : penColor
                     : COLOR_TRANSPARENT;
         }
     }

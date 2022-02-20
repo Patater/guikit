@@ -18,9 +18,10 @@ void VectorsUp(int color, int x0, int y0, int xlen, int ylen)
     /* Lines from center to top of rectangle */
     x = x0 - xlen;
     y = y0 - ylen;
+    SetColor(color);
     for(; x < x0 + xlen; x++)
     {
-        DrawLine(color, x0, y0, x, y);
+        DrawLine(x0, y0, x, y);
         ShowGraphics();
     }
     /* Lines from center to right of rectangle */
@@ -28,7 +29,7 @@ void VectorsUp(int color, int x0, int y0, int xlen, int ylen)
     y = y0 - ylen;
     for(; y < y0 + ylen; y++)
     {
-        DrawLine(color, x0, y0, x, y);
+        DrawLine(x0, y0, x, y);
         ShowGraphics();
     }
     /* Lines from center to bottom of rectangle */
@@ -36,7 +37,7 @@ void VectorsUp(int color, int x0, int y0, int xlen, int ylen)
     y = y0 + ylen - 1;
     for(; x >= x0 - xlen; x--)
     {
-        DrawLine(color, x0, y0, x, y);
+        DrawLine(x0, y0, x, y);
         ShowGraphics();
     }
     /* Lines from center to left of rectangle */
@@ -44,7 +45,7 @@ void VectorsUp(int color, int x0, int y0, int xlen, int ylen)
     y = y0 + ylen - 1;
     for(; y >= y0 - ylen; y--)
     {
-        DrawLine(color, x0, y0, x, y);
+        DrawLine(x0, y0, x, y);
         ShowGraphics();
     }
 }

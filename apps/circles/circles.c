@@ -22,16 +22,17 @@ void RandomCircles(int num)
     for (i = 0; i < num; ++i)
     {
         color = RandRange(0, NUM_COLORS - 1);
+        SetColor(color);
         x = RandRange(0, SCREEN_WIDTH - 1);
         y = RandRange(0, SCREEN_HEIGHT - 1);
         r = RandRange(1, 100);
         if (RandRange(0, 1) == 0)
         {
-            FillCircle(color, x, y, r);
+            FillCircle(x, y, r);
         }
         else
         {
-            DrawCircle(color, x, y, r);
+            DrawCircle(x, y, r);
         }
         ShowGraphics();
     }
@@ -39,8 +40,10 @@ void RandomCircles(int num)
 
 void TestDrawCircles(void)
 {
-    DrawCircle(COLOR_GREEN, 24, 44, 12);
-    FillCircle(COLOR_RED, 44, 44, 12);
+    SetColor(COLOR_GREEN);
+    DrawCircle(24, 44, 12);
+    SetColor(COLOR_RED);
+    FillCircle(44, 44, 12);
 }
 
 int main()

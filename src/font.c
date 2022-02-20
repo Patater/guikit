@@ -583,7 +583,7 @@ int MeasureString(const struct Font *font, const char *s, int *w, int *h)
     return 0;
 }
 
-int DrawString(const struct Font *font, const char *s, int color, int x, int y)
+int DrawString(const struct Font *font, const char *s, int x, int y)
 {
     const struct Glyph *g;
     struct Rect dst;
@@ -602,8 +602,6 @@ int DrawString(const struct Font *font, const char *s, int color, int x, int y)
     src.bottom = font->height - 1;
     dst.bottom = dst.top + src.bottom;
     ss = font->width;
-
-    SetColor(color);
 
     for (;*s != '\0'; ++s)
     {

@@ -98,7 +98,8 @@ void RandomHistograms(int num)
             HistogramPush(h, val);
         }
 
-        FillScreen(COLOR_WHITE);
+        SetColor(COLOR_WHITE);
+        FillScreen();
         /*FillRect(COLOR_WHITE, &rect);*/
         drawAxes(&rect);
         DrawHistogram(h, color, &rect);
@@ -141,7 +142,8 @@ void RandomHistogram(int samples)
         HistogramPush(h, val);
     }
 
-    FillScreen(COLOR_WHITE);
+    SetColor(COLOR_WHITE);
+    FillScreen();
     /*FillRect(COLOR_WHITE, &rect);*/
     /* XXX Looks height is not obeyed... Should we clip? or let histogram
      * outgrow its rect? Let it be ugly if the client asks for it? */
@@ -206,7 +208,8 @@ void SampledHistogram(int samples)
         HistogramPush(n, value);
     }
 
-    FillScreen(COLOR_WHITE);
+    SetColor(COLOR_WHITE);
+    FillScreen();
     /*FillRect(COLOR_WHITE, &rect);*/
     drawAxes(&rect);
     DrawHistogram(n, COLOR_RED, &rect);
@@ -229,7 +232,8 @@ int main()
 
     printf("Drawing 10000 histograms...\n");
 
-    FillScreen(COLOR_WHITE);
+    SetColor(COLOR_WHITE);
+    FillScreen();
     ShowGraphics();
 
     /*RandomHistograms(10000);*/

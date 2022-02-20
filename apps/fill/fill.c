@@ -24,9 +24,10 @@ int main()
     printf("Hello world\n");
 
     /* Display a blue screen for about 2 seconds. */
+    SetColor(COLOR_BLUE);
     for(i = 0; i < 60 * 2; ++i)
     {
-        FillScreen(COLOR_BLUE);
+        FillScreen();
         ShowGraphics();
     }
     SaveScreenShot("fill.bmp");

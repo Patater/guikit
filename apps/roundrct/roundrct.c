@@ -25,6 +25,7 @@ void RandomRoundRects(int num)
     for (i = 0; i < num; ++i)
     {
         color = RandRange(0, NUM_COLORS - 1);
+        SetColor(color);
         x = RandRange(-10, SCREEN_WIDTH + 9);
         y = RandRange(-10, SCREEN_HEIGHT + 9);
         w = RandRange(-10, SCREEN_WIDTH + 9);
@@ -33,11 +34,11 @@ void RandomRoundRects(int num)
 
         if (RandRange(0, 1) == 0)
         {
-            FillRoundRect(color, x, y, r, w, h);
+            FillRoundRect(x, y, r, w, h);
         }
         else
         {
-            DrawRoundRect(color, x, y, r, w, h);
+            DrawRoundRect(x, y, r, w, h);
         }
         ShowGraphics();
     }

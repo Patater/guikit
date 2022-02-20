@@ -16,8 +16,7 @@ void FreeFont(struct Font *font);
 
 int MeasureString(const struct Font *font, const char *s, int *w, int *h);
 
-int DrawString(const struct Font *font, const char *s, int color, int x,
-               int y);
+int DrawString(const struct Font *font, const char *s, int x, int y);
 
 
 #if 0
