@@ -40,6 +40,7 @@ The Patater GUI Kit includes a number of demo applications (see
 [![lines](images/lines.bmp "lines")](apps/lines/)
 [![rect](images/rect.bmp "rect")](apps/rect/)
 [![roundrct](images/roundrct.bmp "roundrct")](apps/roundrct/)
+[![waggle](images/waggle.bmp "waggle")](apps/waggle/)
 
 ### Other fun things inside
 
