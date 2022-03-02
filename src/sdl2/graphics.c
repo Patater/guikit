@@ -82,8 +82,8 @@ int InitGraphicsBGR555(const char *name)
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 
     window = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED,
-                  SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH*2, SCREEN_HEIGHT*2,
-                  0 /* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
+                  SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
+                  SDL_WINDOW_ALLOW_HIGHDPI /* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
     if (window == NULL)
     {
         panic("SDL Error: %s\n", SDL_GetError());
@@ -137,7 +137,7 @@ int InitGraphics(void)
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 
     window = SDL_CreateWindow("Patater GUI Kit", SDL_WINDOWPOS_UNDEFINED,
-                  SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH*2, SCREEN_HEIGHT*2,
+                  SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
                   SDL_WINDOW_ALLOW_HIGHDPI /* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
     if (window == NULL)
     {
