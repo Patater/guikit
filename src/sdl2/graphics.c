@@ -138,7 +138,7 @@ int InitGraphics(void)
 
     window = SDL_CreateWindow("Patater GUI Kit", SDL_WINDOWPOS_UNDEFINED,
                   SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH*2, SCREEN_HEIGHT*2,
-                  0 /* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
+                  SDL_WINDOW_ALLOW_HIGHDPI /* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
     if (window == NULL)
     {
         panic("SDL Error: %s\n", SDL_GetError());
