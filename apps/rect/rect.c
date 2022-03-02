@@ -35,7 +35,11 @@ void RandomRects(int num)
         {
             DrawRect(&rect);
         }
-        ShowGraphics();
+
+        if (i % 100 == 0)
+        {
+            ShowGraphics();
+        }
     }
 }
 
@@ -51,6 +55,7 @@ int main()
 
     printf("Drawing 10000 rectangles...\n");
     RandomRects(10000);
+    ShowGraphics();
     SaveScreenShot("rect.bmp");
     FreeGraphics();
 

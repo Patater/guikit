@@ -33,7 +33,10 @@ void RandomColorBitmaps(int num, int span, const unsigned char *img,
 
         DrawColorBitmap(&dst, span, img, mask);
 
-        ShowGraphics();
+        if (i % 100 == 0)
+        {
+            ShowGraphics();
+        }
     }
 }
 
@@ -55,7 +58,10 @@ void RandomBitmaps(int num, int span, const unsigned char *img,
 
         DrawBitmap(&dst, span, img, mask);
 
-        ShowGraphics();
+        if (i % 100 == 0)
+        {
+            ShowGraphics();
+        }
     }
 }
 
@@ -116,6 +122,7 @@ int main(int argc, const char *argv[])
     {
         RandomBitmaps(10000, span, img, mask, imgRect.right, imgRect.bottom);
     }
+    ShowGraphics();
 
     SaveScreenShot("bmpshow.bmp");
 

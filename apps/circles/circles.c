@@ -34,7 +34,11 @@ void RandomCircles(int num)
         {
             DrawCircle(x, y, r);
         }
-        ShowGraphics();
+
+        if (i % 100 == 0)
+        {
+            ShowGraphics();
+        }
     }
 }
 
@@ -58,6 +62,7 @@ int main()
 
     printf("Drawing 10000 circles...\n");
     RandomCircles(10000);
+    ShowGraphics();
     SaveScreenShot("circles.bmp");
     FreeGraphics();
 

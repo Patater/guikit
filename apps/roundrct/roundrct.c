@@ -40,7 +40,11 @@ void RandomRoundRects(int num)
         {
             DrawRoundRect(x, y, r, w, h);
         }
-        ShowGraphics();
+
+        if (i % 100 == 0)
+        {
+            ShowGraphics();
+        }
     }
 }
 
@@ -56,6 +60,7 @@ int main()
 
     printf("Drawing 10000 round rects...\n");
     RandomRoundRects(10000);
+    ShowGraphics();
     SaveScreenShot("roundrct.bmp");
     FreeGraphics();
 

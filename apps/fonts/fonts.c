@@ -605,7 +605,10 @@ void RandomText(int num)
         SetColor(fgColor);
         DrawString(font, text, x, y);
 
-        ShowGraphics();
+        if (i % 100 == 0)
+        {
+            ShowGraphics();
+        }
     }
 }
 
@@ -624,6 +627,7 @@ int main()
     FillScreen();
     ShowGraphics();
     RandomText(10000);
+    ShowGraphics();
 
     SaveScreenShot("fonts.bmp");
 
