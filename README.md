@@ -32,6 +32,7 @@ The graphics library supports the following backends:
 The Patater GUI Kit includes a number of demo applications (see
 [`apps/`](apps)). Here's what they look like.
 
+[![bezline](images/bezline.bmp "bezline")](apps/bezline/)
 [![bmpshow](images/bmpshow.bmp "bmpshow")](apps/bmpshow/)
 [![circles](images/circles.bmp "circles")](apps/circles/)
 [![fill](images/fill.bmp "fill")](apps/fill/)

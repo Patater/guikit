@@ -430,7 +430,7 @@ Diagonal lines for testing.
 -- (480,360) -> (361,479)
         (480,360)->(361,120)
 */
-    printf("\t(%d,%d)->(%d,%d)\n", x1, y1, x2, len);
+    /*printf("\t(%d,%d)->(%d,%d)\n", x1, y1, x2, len);*/
 
     /* Right to left or left to right */
     /* Assumes top to bottom */
@@ -546,7 +546,7 @@ void DrawLine(int x1, int y1, int x2, int y2)
     /* Special-case diagonal lines */
     else if (YDelta == XDelta)
     {
-        printf("-- (%d,%d) -> (%d,%d)\n", x1, y1, x2, y2);
+        /*printf("-- (%d,%d) -> (%d,%d)\n", x1, y1, x2, y2);*/
         drawDiagLine(x1, y1, x2, XDelta+1);
         return;
     }

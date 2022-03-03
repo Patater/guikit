@@ -1,3 +1,4 @@
+add_subdirectory(bezline)
 add_subdirectory(bmpshow)
 add_subdirectory(circles)
 add_subdirectory(fill)
