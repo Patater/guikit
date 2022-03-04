@@ -34,6 +34,7 @@ The Patater GUI Kit includes a number of demo applications (see
 
 [![bezline](images/bezline.bmp "bezline")](apps/bezline/)
 [![bmpshow](images/bmpshow.bmp "bmpshow")](apps/bmpshow/)
+[![cardioid](images/cardioid.bmp "cardioid")](apps/cardioid/)
 [![circles](images/circles.bmp "circles")](apps/circles/)
 [![fill](images/fill.bmp "fill")](apps/fill/)
 [![fonts](images/fonts.bmp "fonts")](apps/fonts/)

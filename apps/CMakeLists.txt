@@ -1,5 +1,6 @@
 add_subdirectory(bezline)
 add_subdirectory(bmpshow)
+add_subdirectory(cardioid)
 add_subdirectory(circles)
 add_subdirectory(fill)
 add_subdirectory(fonts)
