@@ -64,8 +64,10 @@ void ShowGraphics(void);
 
 void SetColor(int color);
 void SetColorRGB(unsigned char r, unsigned char g, unsigned char b);
+void SetColorHSV(unsigned char h, unsigned char s, unsigned char v);
 void SetBGColor(int color);
 void SetBGColorRGB(unsigned char r, unsigned char g, unsigned char b);
+void SetBGColorHSV(unsigned char h, unsigned char s, unsigned char v);
 
 int SaveScreenShot(const char *path);
 

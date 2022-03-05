@@ -239,6 +239,64 @@ void SetColorRGB(unsigned char r, unsigned char g, unsigned char b)
     penColor = surfaceRGB(r, g, b);
 }
 
+void SetColorHSV(unsigned char h, unsigned char s, unsigned char v)
+{
+    enum {
+        MAX_H = 255, /* Maximum value of h */
+        MAX_C = 255, /* Max value for s, v, r, g, b */
+        THE_END = 0
+    };
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    const unsigned int hi = h / (MAX_H / 6 + 1);
+    const unsigned int hj = (h - hi * (MAX_H / 6 + 1)) * 6;
+    const unsigned int p = v * (MAX_C - s) / MAX_C;
+    const unsigned int q = v * (MAX_C - (s * hj) / MAX_H) / MAX_C;
+    const unsigned int t = v * (MAX_C - (s * (MAX_H - hj)) / MAX_H) / MAX_C;
+
+    switch (hi)
+    {
+        case 0:
+            r = v;
+            g = t;
+            b = p;
+            break;
+        case 1:
+            r = q;
+            g = v;
+            b = p;
+            break;
+        case 2:
+            r = p;
+            g = v;
+            b = t;
+            break;
+        case 3:
+            r = p;
+            g = q;
+            b = v;
+            break;
+        case 4:
+            r = t;
+            g = p;
+            b = v;
+            break;
+        case 5:
+            r = v;
+            g = p;
+            b = q;
+            break;
+        default:
+            r = 0;
+            g = 0;
+            b = 0;
+            break;
+    }
+
+    SetColorRGB(r, g, b);
+}
+
 void FillScreen()
 {
     SDL_FillRect(surface, NULL, penColor);
