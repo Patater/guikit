@@ -32,17 +32,17 @@ The graphics library supports the following backends:
 The Patater GUI Kit includes a number of demo applications (see
 [`apps/`](apps)). Here's what they look like.
 
-[![bezline](images/bezline.bmp "bezline")](apps/bezline/)
-[![bmpshow](images/bmpshow.bmp "bmpshow")](apps/bmpshow/)
-[![cardioid](images/cardioid.bmp "cardioid")](apps/cardioid/)
-[![circles](images/circles.bmp "circles")](apps/circles/)
-[![fill](images/fill.bmp "fill")](apps/fill/)
-[![fonts](images/fonts.bmp "fonts")](apps/fonts/)
-[![histgram](images/histgram.bmp "histgram")](apps/histgram/)
-[![lines](images/lines.bmp "lines")](apps/lines/)
-[![rect](images/rect.bmp "rect")](apps/rect/)
-[![roundrct](images/roundrct.bmp "roundrct")](apps/roundrct/)
-[![waggle](images/waggle.bmp "waggle")](apps/waggle/)
+[![bezline](images/bezline.png "bezline")](apps/bezline/)
+[![bmpshow](images/bmpshow.png "bmpshow")](apps/bmpshow/)
+[![cardioid](images/cardioid.png "cardioid")](apps/cardioid/)
+[![circles](images/circles.png "circles")](apps/circles/)
+[![fill](images/fill.png "fill")](apps/fill/)
+[![fonts](images/fonts.png "fonts")](apps/fonts/)
+[![histgram](images/histgram.png "histgram")](apps/histgram/)
+[![lines](images/lines.png "lines")](apps/lines/)
+[![rect](images/rect.png "rect")](apps/rect/)
+[![roundrct](images/roundrct.png "roundrct")](apps/roundrct/)
+[![waggle](images/waggle.png "waggle")](apps/waggle/)
 
 ### Other fun things inside
 
