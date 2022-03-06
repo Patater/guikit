@@ -8,6 +8,7 @@ set -e
 ./build/apps/fonts/fonts
 ./build/apps/histgram/histgram
 ./build/apps/lines/lines
+./build/apps/primes/primes
 ./build/apps/rect/rect
 ./build/apps/roundrct/roundrct
 ./build/apps/waggle/waggle
@@ -20,6 +21,7 @@ convert fill.bmp images/fill.png
 convert fonts.bmp images/fonts.png
 convert histgram.bmp images/histgram.png
 convert lines.bmp images/lines.png
+convert primes.bmp images/primes.png
 convert rect.bmp images/rect.png
 convert roundrct.bmp images/roundrct.png
 convert waggle.bmp images/waggle.png

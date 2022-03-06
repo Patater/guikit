@@ -40,6 +40,7 @@ The Patater GUI Kit includes a number of demo applications (see
 [![fonts](images/fonts.png "fonts")](apps/fonts/)
 [![histgram](images/histgram.png "histgram")](apps/histgram/)
 [![lines](images/lines.png "lines")](apps/lines/)
+[![primes](images/primes.png "primes")](apps/primes/)
 [![rect](images/rect.png "rect")](apps/rect/)
 [![roundrct](images/roundrct.png "roundrct")](apps/roundrct/)
 [![waggle](images/waggle.png "waggle")](apps/waggle/)
