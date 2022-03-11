@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <sys/time.h>
 
+#define DRAW_CIRCLES 0
+
 static float lerp(float a, float b, float t)
 {
     /* Linear interpolation */
@@ -59,7 +61,7 @@ static void linearBezier(float *x, float *y, float px[2], float py[3], float t)
 void BezLines(int frame)
 {
     float t;
-    const float delta = 0.03f;
+    const float delta = 0.05f;
     float px[4];
     float py[4];
     float x[4];
@@ -87,8 +89,10 @@ void BezLines(int frame)
     {
         float u[2];
         float v[2];
+#if DRAW_CIRCLES
         float a;
         float b;
+#endif
 
         /* Equivalent to one quadradic bezier */
         linearBezier(&x[0], &y[0], &px[0], &py[0], t);
@@ -103,8 +107,10 @@ void BezLines(int frame)
         v[1] = lerp(y[2], y[3], t);
 
         /* Equivalent to a cubic bezier */
+#if DRAW_CIRCLES
         a = lerp(u[0], u[1], t);
         b = lerp(v[0], v[1], t);
+#endif
 
         /* Draw control points */
         SetColor(COLOR_WHITE);
@@ -113,9 +119,12 @@ void BezLines(int frame)
 
         /* Draw the curves */
         SetColorHSV(wrapf(t * 256.0f, 256.0f), 255, 255);
+#if DRAW_CIRCLES
         FillCircle(a, b, 8);
+#endif
         DrawLine(x[0], y[0], x[1], y[1]);
         DrawLine(x[2], y[2], x[3], y[3]);
+        DrawLine(u[0], v[0], u[1], v[1]);
     }
 
     ShowGraphics();
