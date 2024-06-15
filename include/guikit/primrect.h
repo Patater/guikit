@@ -1,10 +1,12 @@
-/*
- *  primrect.h
- *  Patater GUI Kit
+/**
+ *  @file primrect.h
+ *  @brief Primitive Rectangle
  *
+ *  Patater GUI Kit
  *  Created by Jaeden Amero on 2021-01-15.
  *  Copyright 2021. SPDX-License-Identifier: AGPL-3.0-or-later
  */
+
 
 #ifndef PRIMRECT_H
 #define PRIMRECT_H

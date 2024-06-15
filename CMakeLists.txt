@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.23)
 
 project(guikit
     VERSION 2.0
@@ -17,3 +17,4 @@ set(GRAPHICS "SDL2" CACHE STRING "Graphics rendering backend")
 
 add_subdirectory(src)
 add_subdirectory(apps)
+add_subdirectory(docs)

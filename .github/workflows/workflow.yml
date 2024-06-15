@@ -19,6 +19,7 @@ jobs:
             sudo apt-get update
             sudo apt-get install \
               cmake \
+              doxygen \
               iwyu \
               lcov \
               libsdl2-dev \
@@ -26,6 +27,7 @@ jobs:
               #
             echo -n "CC: "; cc --version
             echo -n "CMake: "; cmake --version
+            echo -n "doxygen: "; doxygen --version
             echo -n "lcov: "; lcov --version
             echo -n "ninja: "; ninja --version
             echo -n "sdl2: "; sdl2-config --version
@@ -55,3 +57,26 @@ jobs:
           name: codecov-umbrella # optional
           fail_ci_if_error: true
           verbose: true
+
+      - name: Upload docs
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: github-pages
+          path: build/docs/html
+
+  deploy:
+    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

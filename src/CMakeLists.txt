@@ -16,6 +16,29 @@ add_library(guikit
     primrect.c
 )
 
+target_sources(guikit
+    PUBLIC FILE_SET HEADERS
+    BASE_DIRS ../include
+    FILES
+        ../include/guikit/ansidos.h
+        ../include/guikit/array.h
+        ../include/guikit/bmp.h
+        ../include/guikit/debug.h
+        ../include/guikit/font.h
+        ../include/guikit/graphics.h
+        ../include/guikit/hash.h
+        ../include/guikit/hashmap.h
+        ../include/guikit/histgram.h
+        ../include/guikit/intern.h
+        ../include/guikit/panic.h
+        ../include/guikit/pmemory.h
+        ../include/guikit/prandom.h
+        ../include/guikit/primrect.h
+        ../include/guikit/ptypes.h
+        ../include/guikit/sassert.h
+        ../include/guikit/snprintf.h
+)
+
 target_include_directories(guikit
     PUBLIC ../include
 )

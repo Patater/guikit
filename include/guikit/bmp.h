@@ -1,7 +1,8 @@
-/*
- *  bmp.h
- *  Patater GUI Kit
+/**
+ *  @file bmp.h
+ *  @brief BMP
  *
+ *  Patater GUI Kit
  *  Created by Jaeden Amero on 2020-12-24.
  *  Copyright 2020. SPDX-License-Identifier: AGPL-3.0-or-later
  */

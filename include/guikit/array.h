@@ -1,7 +1,8 @@
-/*
- *  array.h
- *  Patater GUI Kit
+/**
+ *  @file array.h
+ *  @brief Array
  *
+ *  Patater GUI Kit
  *  Created by Jaeden Amero on 2021-04-21.
  *  Copyright 2021. SPDX-License-Identifier: AGPL-3.0-or-later
  */

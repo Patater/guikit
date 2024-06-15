@@ -1,7 +1,8 @@
-/*
- *  snprintf.h
- *  Patater GUI Kit
+/**
+ *  @file snprintf.h
+ *  @brief snprintf
  *
+ *  Patater GUI Kit
  *  Created by Jaeden Amero on 2020-12-29.
  *  Copyright 2020. SPDX-License-Identifier: AGPL-3.0-or-later
  */

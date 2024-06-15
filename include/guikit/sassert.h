@@ -1,7 +1,8 @@
-/*
- *  sassert.h
- *  Patater GUI Kit
+/**
+ *  @file sassert.h
+ *  @brief Static Assert
  *
+ *  Patater GUI Kit
  *  Created by Jaeden Amero on 2019-05-05.
  *  Copyright 2019. SPDX-License-Identifier: AGPL-3.0-or-later
  */

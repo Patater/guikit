@@ -1,7 +1,8 @@
-/*
- *  debug.h
- *  Patater GUI Kit
+/**
+ *  @file debug.h
+ *  @brief Debug
  *
+ *  Patater GUI Kit
  *  Created by Jaeden Amero on 2020-12-20.
  *  Copyright 2020. SPDX-License-Identifier: AGPL-3.0-or-later
  */

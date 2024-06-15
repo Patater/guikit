@@ -1,7 +1,8 @@
-/*
- *  ansidos.h
- *  Patater GUI Kit
+/**
+ *  @file ansidos.h
+ *  @brief ANSI DOS
  *
+ *  Patater GUI Kit
  *  Created by Jaeden Amero on 2020-12-12.
  *  Copyright 2020. SPDX-License-Identifier: AGPL-3.0-or-later
  */

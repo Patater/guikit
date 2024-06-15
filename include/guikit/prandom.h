@@ -1,7 +1,8 @@
-/*
- *  prandom.h
- *  Patater GUI Kit
+/**
+ *  @file prandom.h
+ *  @brief Patater Random
  *
+ *  Patater GUI Kit
  *  Created by Jaeden Amero on 2021-05-03.
  *  Copyright 2021. SPDX-License-Identifier: AGPL-3.0-or-later
  */

@@ -1,7 +1,8 @@
-/*
- *  graphics.h
- *  Patater GUI Kit
+/**
+ *  @file graphics.h
+ *  @brief Graphics
  *
+ *  Patater GUI Kit
  *  Created by Jaeden Amero on 2020-12-12.
  *  Copyright 2020. SPDX-License-Identifier: AGPL-3.0-or-later
  */
