@@ -297,7 +297,7 @@ void SetColorHSV(unsigned char h, unsigned char s, unsigned char v)
     SetColorRGB(r, g, b);
 }
 
-void FillScreen()
+void FillScreen(void)
 {
     SDL_FillRect(surface, NULL, penColor);
 }

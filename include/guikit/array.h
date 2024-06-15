@@ -40,7 +40,7 @@ static size_t array_cap(const void *a);
  */
 
 /* LCOV_EXCL_START */
-void arrayUnusedFunctionWarningEliminator()
+void arrayUnusedFunctionWarningEliminator(void)
 {
     /* To avoid warnings like:
      *

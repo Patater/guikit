@@ -220,7 +220,7 @@ void SampledHistogram(int samples)
     ShowGraphics();
 }
 
-int main()
+int main(void)
 {
     int ret;
 

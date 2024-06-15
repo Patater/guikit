@@ -130,7 +130,7 @@ void BezLines(int frame)
     ShowGraphics();
 }
 
-int main()
+int main(void)
 {
     int ret;
     int i;

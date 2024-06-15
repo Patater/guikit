@@ -197,7 +197,7 @@ static void PrimeSpiral(int frame)
     }
 }
 
-int main()
+int main(void)
 {
     int ret;
     int i;

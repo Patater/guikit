@@ -60,7 +60,7 @@ void TestDrawLines(void)
     VectorsUp(COLOR_RED, X_MAX * 3 / 4, Y_MAX * 3 / 4, X_MAX / 4, Y_MAX / 4);
 }
 
-int main()
+int main(void)
 {
     int ret;
 

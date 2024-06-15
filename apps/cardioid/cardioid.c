@@ -200,7 +200,7 @@ void Cardioid(int frame)
     DrawCircle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, radius);
 }
 
-int main()
+int main(void)
 {
     const struct Font *font;
     int ret;

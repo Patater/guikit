@@ -14,7 +14,7 @@
 int DebugInit(void);
 void DebugFree(void);
 
-int DebugPoll();
+int DebugPoll(void);
 
 int DebugPutchar(char c);
 int DebugPuts(const char *str);

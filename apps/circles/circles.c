@@ -50,7 +50,7 @@ void TestDrawCircles(void)
     FillCircle(44, 44, 12);
 }
 
-int main()
+int main(void)
 {
     int ret;
 

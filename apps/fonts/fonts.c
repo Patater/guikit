@@ -612,7 +612,7 @@ void RandomText(int num)
     }
 }
 
-int main()
+int main(void)
 {
     int ret;
 

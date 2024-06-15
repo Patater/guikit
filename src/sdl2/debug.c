@@ -34,7 +34,7 @@ int DebugPuts(const char *str)
     return 0;
 }
 
-int DebugPoll()
+int DebugPoll(void)
 {
     return 0;
 }
