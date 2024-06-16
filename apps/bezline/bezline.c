@@ -34,7 +34,7 @@ static float wrapf(float a, float max)
  * py, along path t. */
 /* Bezier equation B(t) for linear Bezier curves from
  * https://en.wikipedia.org/wiki/B%C3%A9zier_curve */
-static void linearBezier(float *x, float *y, float px[2], float py[3], float t)
+static void linearBezier(float *x, float *y, float px[2], float py[2], float t)
 {
     float a[2];
 
