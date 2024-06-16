@@ -59,11 +59,16 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
-      - name: Upload docs
+      - name: Prepare GitHub Pages site
+        run: |
+          cp -a build/docs/html _site/doxygen
+          cp -a build/lcov _site/lcov
+
+      - name: Upload _site to GitHub
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages
-          path: build/docs/html
+          path: _site
 
   deploy:
     needs: build
