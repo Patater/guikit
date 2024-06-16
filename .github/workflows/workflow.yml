@@ -17,7 +17,13 @@ jobs:
       - name: Install build environment
         run: |
             sudo apt-get update
-            sudo apt-get install cmake iwyu lcov libsdl2-dev ninja-build
+            sudo apt-get install \
+              cmake \
+              iwyu \
+              lcov \
+              libsdl2-dev \
+              ninja-build \
+              #
             echo -n "CC: "; cc --version
             echo -n "CMake: "; cmake --version
             echo -n "lcov: "; lcov --version
